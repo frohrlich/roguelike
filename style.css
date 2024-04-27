@@ -1,0 +1,48 @@
+@font-face {
+  font-family: "dogicapixel";
+  src: url("assets/fonts/Dogica_Pixel.woff2") format("woff2"),
+    url("assets/fonts/Dogica_Pixel.woff") format("woff"),
+    url("assets/fonts/Dogica_Pixel.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "dogicapixel";
+  src: url("assets/fonts/Dogica_Pixel_Bold.woff2") format("woff2"),
+    url("assets/fonts/Dogica_Pixel_Bold.woff") format("woff"),
+    url("assets/fonts/Dogica_Pixel_Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+#fullscreenButton-div {
+  display: flex;
+  padding: 5%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: rgb(30, 46, 27);
+  text-align: center;
+}
+
+#fullscreen-button {
+  width: 100%;
+  height: 20vh;
+  min-height: 80px;
+  min-width: 535px;
+  border: 1px solid black;
+  border-radius: 20px;
+  background-color: green;
+  color: white;
+  font-size: 56px;
+  font-family: "dogicapixel";
+}
+
+#rotateScreenTip {
+  font-size: 23px;
+  color: white;
+}

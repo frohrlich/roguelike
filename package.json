@@ -10,10 +10,15 @@
   "author": "Félix Rohrlich",
   "license": "ISC",
   "devDependencies": {
+    "@types/ua-parser-js": "^0.7.39",
     "phaser": "^3.80.1",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "screenfull": "^6.0.2",
+    "ua-parser-js": "^1.0.37"
   }
 }
