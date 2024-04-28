@@ -42,7 +42,7 @@ export class MapScene extends Phaser.Scene {
       .on("pointerup", () => {
         this.scene.start("BattleScene", {
           playerType: this.currentCharacterChoice,
-          enemyType: "Snowman",
+          enemyType: "Dude",
         });
       });
   }

@@ -1074,7 +1074,7 @@ export class BattleScene extends Phaser.Scene {
 
   endBattle() {
     this.resetScene();
-    this.scene.start("BootScene");
+    this.scene.start("ChooseCardScene", { isStarting: false });
   }
 
   resetScene() {

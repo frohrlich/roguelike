@@ -83,6 +83,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.scene.start("ChooseCardScene");
+    this.scene.start("ChooseCardScene", { isStarting: true });
   }
 }

@@ -1,11 +1,13 @@
 import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
 import { findUnitDataByType } from "../data/UnitData";
+import { DeckService } from "../services/deckService";
 
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;
 
-  currentCharacterChoice: string;
+  currentCardChoice: string;
+  isStarting: boolean;
 
   constructor() {
     super({
@@ -13,7 +15,8 @@ export class ChooseCardScene extends Phaser.Scene {
     });
   }
 
-  create() {
+  create(data: any) {
+    this.isStarting = data.isStarting;
     // add cards
     const card1 = new Card(
       this,
@@ -40,13 +43,16 @@ export class ChooseCardScene extends Phaser.Scene {
     this.add.existing(card3);
 
     // add choose your fighter text/button
+    const buttonText = this.isStarting
+      ? "Choose your \nstarting\ncard !"
+      : "Choose a\ncard !";
     const chooseTextX = card1.displayWidth * 3 + this.cardMargin * 3 + 14;
     const chooseText = this.add
       .bitmapText(
         chooseTextX,
         this.game.scale.height / 2,
         "dogicapixelbold",
-        "Choose your \nfighter !",
+        buttonText,
         24
       )
       .setDepth(-1)
@@ -66,9 +72,17 @@ export class ChooseCardScene extends Phaser.Scene {
       .setVisible(false)
       .setInteractive()
       .on("pointerup", () => {
-        this.scene.start("MapScene", {
-          playerType: this.currentCharacterChoice,
-        });
+        DeckService.addCard(this.currentCardChoice);
+        if (this.isStarting) {
+          this.scene.start("MapScene", {
+            playerType: this.currentCardChoice,
+          });
+        } else {
+          this.scene.start("BattleScene", {
+            playerType: this.currentCardChoice,
+            enemyType: "Dude",
+          });
+        }
       });
 
     // add character description on bottom
@@ -82,9 +96,9 @@ export class ChooseCardScene extends Phaser.Scene {
 
     // add events on clicking cards
     card1.on("pointerup", () => {
-      toggleCardsVisibility(card2, card3);
-      toggleChooseFighter(chooseText, chooseButton, card1.unitData.type);
-      this.currentCharacterChoice = card1.unitData.type;
+      this.toggleCardsVisibility(card2, card3);
+      this.toggleChooseFighter(chooseText, chooseButton, card1.unitData.type);
+      this.currentCardChoice = card1.unitData.type;
       if (characterDescription.text === card1.unitData.description) {
         characterDescription.text = "";
       } else {
@@ -92,9 +106,9 @@ export class ChooseCardScene extends Phaser.Scene {
       }
     });
     card2.on("pointerup", () => {
-      toggleCardsVisibility(card1, card3);
-      toggleChooseFighter(chooseText, chooseButton, card2.unitData.type);
-      this.currentCharacterChoice = card2.unitData.type;
+      this.toggleCardsVisibility(card1, card3);
+      this.toggleChooseFighter(chooseText, chooseButton, card2.unitData.type);
+      this.currentCardChoice = card2.unitData.type;
       if (characterDescription.text === card2.unitData.description) {
         characterDescription.text = "";
       } else {
@@ -102,9 +116,9 @@ export class ChooseCardScene extends Phaser.Scene {
       }
     });
     card3.on("pointerup", () => {
-      toggleCardsVisibility(card1, card2);
-      toggleChooseFighter(chooseText, chooseButton, card3.unitData.type);
-      this.currentCharacterChoice = card3.unitData.type;
+      this.toggleCardsVisibility(card1, card2);
+      this.toggleChooseFighter(chooseText, chooseButton, card3.unitData.type);
+      this.currentCardChoice = card3.unitData.type;
       if (characterDescription.text === card3.unitData.description) {
         characterDescription.text = "";
       } else {
@@ -152,28 +166,30 @@ export class ChooseCardScene extends Phaser.Scene {
       8
     );
   }
+
+  toggleCardsVisibility = (...cards: Card[]) => {
+    cards.forEach((card) => {
+      card.setVisible(!card.visible);
+    });
+  };
+
+  toggleChooseFighter = (
+    chooseText: Phaser.GameObjects.BitmapText,
+    chooseButton: Phaser.GameObjects.Rectangle,
+    type: string
+  ) => {
+    const defaultText = this.isStarting
+      ? "Choose your \nstarting\ncard !"
+      : "Choose a\ncard !";
+    if (chooseText.text === defaultText) {
+      chooseText.text = `Choose\n${type} ?`;
+      chooseText.tint = 0x00ff00;
+      chooseButton.setVisible(true);
+      chooseButton.displayWidth = chooseText.displayWidth + 5;
+    } else {
+      chooseText.text = defaultText;
+      chooseText.tint = 0xffffff;
+      chooseButton.setVisible(false);
+    }
+  };
 }
-
-const toggleCardsVisibility = (...cards: Card[]) => {
-  cards.forEach((card) => {
-    card.setVisible(!card.visible);
-  });
-};
-
-const toggleChooseFighter = (
-  chooseText: Phaser.GameObjects.BitmapText,
-  chooseButton: Phaser.GameObjects.Rectangle,
-  type: string
-) => {
-  const defaultText = "Choose your \nfighter !";
-  if (chooseText.text === defaultText) {
-    chooseText.text = `Choose\n${type} ?`;
-    chooseText.tint = 0x00ff00;
-    chooseButton.setVisible(true);
-    chooseButton.displayWidth = chooseText.displayWidth + 5;
-  } else {
-    chooseText.text = defaultText;
-    chooseText.tint = 0xffffff;
-    chooseButton.setVisible(false);
-  }
-};

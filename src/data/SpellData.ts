@@ -134,36 +134,15 @@ const plague = new Spell(
 const punch = new Spell(68, 1, 1, 4, "Punch", true, false, 50);
 
 // DEV
-// const sting = new Spell(
-//   80,
-//   0,
-//   30,
-//   0,
-//   "Sting",
-//   false,
-//   false,
-//   100,
-//   0,
-//   1,
-//   0,
-//   0,
-//   0,
-//   "monoTarget",
-//   0,
-//   0,
-//   null
-// );
-
-// PROD
 const sting = new Spell(
   80,
   0,
-  12,
-  2,
+  30,
+  0,
   "Sting",
-  true,
   false,
-  15,
+  false,
+  100,
   0,
   1,
   0,
@@ -171,8 +150,29 @@ const sting = new Spell(
   0,
   "monoTarget",
   0,
-  1
+  0,
+  null
 );
+
+// PROD
+// const sting = new Spell(
+//   80,
+//   0,
+//   12,
+//   2,
+//   "Sting",
+//   true,
+//   false,
+//   15,
+//   0,
+//   1,
+//   0,
+//   0,
+//   0,
+//   "monoTarget",
+//   0,
+//   1
+// );
 
 const heal = new Spell(
   92,
