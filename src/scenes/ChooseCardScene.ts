@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
-import { GAME_HEIGHT, GAME_WIDTH } from "../app";
 import { findUnitDataByType } from "../data/UnitData";
 
 export class ChooseCardScene extends Phaser.Scene {
@@ -19,19 +18,19 @@ export class ChooseCardScene extends Phaser.Scene {
     const card1 = new Card(
       this,
       0,
-      GAME_HEIGHT / 2,
+      this.game.scale.height / 2,
       findUnitDataByType("Amazon")
     ).setDepth(2);
     const card2 = new Card(
       this,
       card1.displayWidth * 1.5 + this.cardMargin * 2,
-      GAME_HEIGHT / 2,
+      this.game.scale.height / 2,
       findUnitDataByType("Renegade")
     ).setDepth(1);
     const card3 = new Card(
       this,
       card1.displayWidth * 2.5 + this.cardMargin * 3,
-      GAME_HEIGHT / 2,
+      this.game.scale.height / 2,
       findUnitDataByType("Stranger"),
       true
     );
@@ -45,7 +44,7 @@ export class ChooseCardScene extends Phaser.Scene {
     const chooseText = this.add
       .bitmapText(
         chooseTextX,
-        GAME_HEIGHT / 2,
+        this.game.scale.height / 2,
         "dogicapixelbold",
         "Choose your \nfighter !",
         24
@@ -67,9 +66,8 @@ export class ChooseCardScene extends Phaser.Scene {
       .setVisible(false)
       .setInteractive()
       .on("pointerup", () => {
-        this.scene.start("BattleScene", {
+        this.scene.start("MapScene", {
           playerType: this.currentCharacterChoice,
-          enemyType: "Snowman",
         });
       });
 

@@ -4,6 +4,7 @@ import { BattleScene } from "./scenes/BattleScene";
 import { BattleUIScene } from "./scenes/BattleUIScene";
 import { GameOverScene } from "./scenes/GameOverScene";
 import { ChooseCardScene } from "./scenes/ChooseCardScene";
+import { MapScene } from "./scenes/MapScene";
 import screenfull from "screenfull";
 import { UAParser } from "ua-parser-js";
 
@@ -30,6 +31,7 @@ const config = {
   scene: [
     BootScene,
     ChooseCardScene,
+    MapScene,
     BattleScene,
     BattleUIScene,
     GameOverScene,
@@ -67,9 +69,9 @@ window.onload = () => {
     }
   });
 
-  // gameDiv.hidden = false;
-  // fullscreenButton.hidden = true;
-  // fullscreenButtonDiv.style.display = "none";
+  gameDiv.hidden = false;
+  fullscreenButton.hidden = true;
+  fullscreenButtonDiv.style.display = "none";
 
   var game = new RpgGame(config);
 };

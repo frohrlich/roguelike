@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { GAME_HEIGHT, GAME_WIDTH } from "../app";
+import { GAME_WIDTH, GAME_HEIGHT } from "../app";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
