@@ -3,6 +3,7 @@ import { BootScene } from "./scenes/BootScene";
 import { BattleScene } from "./scenes/BattleScene";
 import { BattleUIScene } from "./scenes/BattleUIScene";
 import { GameOverScene } from "./scenes/GameOverScene";
+import { ChooseCardScene } from "./scenes/ChooseCardScene";
 import screenfull from "screenfull";
 import { UAParser } from "ua-parser-js";
 
@@ -26,7 +27,13 @@ const config = {
       debug: false,
     },
   },
-  scene: [BootScene, BattleScene, BattleUIScene, GameOverScene],
+  scene: [
+    BootScene,
+    ChooseCardScene,
+    BattleScene,
+    BattleUIScene,
+    GameOverScene,
+  ],
 };
 export class RpgGame extends Phaser.Game {
   constructor(config: Phaser.Types.Core.GameConfig) {

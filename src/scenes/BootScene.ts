@@ -83,11 +83,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    // this.scene.start("WorldScene");
-    this.scene.start("BattleScene", {
-      playerType: "Renegade",
-      enemyType: "Snowman",
-      enemyId: 1,
-    });
+    this.scene.start("ChooseCardScene");
   }
 }

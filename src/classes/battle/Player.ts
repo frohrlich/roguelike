@@ -40,7 +40,7 @@ export class Player extends Unit {
   override castSpell(spell: Spell, targetVec: Phaser.Math.Vector2): void {
     super.castSpell(spell, targetVec);
     // if spell not available anymore : quit spell mode
-    if (this.pa < spell.cost || spell.cooldown > 0) {
+    if (this.ap < spell.cost || spell.cooldown > 0) {
       this.myScene.clearSpellRange();
       this.myScene.refreshAccessibleTiles();
       this.myScene.highlightAccessibleTiles(this.myScene.accessibleTiles);

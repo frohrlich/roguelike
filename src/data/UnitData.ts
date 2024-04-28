@@ -2,8 +2,8 @@
 
 export interface UnitData {
   HP: number;
-  PM: number;
-  PA: number;
+  MP: number;
+  AP: number;
   spells: string;
   frame: number;
   type: string;
@@ -12,8 +12,8 @@ export interface UnitData {
 
 export const amazon: UnitData = {
   HP: 100,
-  PM: 5,
-  PA: 6,
+  MP: 5,
+  AP: 6,
   spells: "Deadly javelin, Herbal medicine, Sting",
   frame: 8,
   type: "Amazon",
@@ -22,8 +22,8 @@ export const amazon: UnitData = {
 
 export const renegade: UnitData = {
   HP: 120,
-  PM: 4,
-  PA: 6,
+  MP: 4,
+  AP: 6,
   spells: "Weighted net, Trident, Punch",
   frame: 84,
   type: "Renegade",
@@ -32,8 +32,8 @@ export const renegade: UnitData = {
 
 export const stranger: UnitData = {
   HP: 80,
-  PM: 4,
-  PA: 6,
+  MP: 4,
+  AP: 6,
   spells: "Stargazing, Revelation, Plague",
   frame: 88,
   type: "Stranger",
@@ -42,8 +42,8 @@ export const stranger: UnitData = {
 
 export const snowman: UnitData = {
   HP: 100,
-  PM: 6,
-  PA: 6,
+  MP: 6,
+  AP: 6,
   spells: "Sting",
   frame: 40,
   type: "Snowman",
@@ -52,8 +52,8 @@ export const snowman: UnitData = {
 
 export const dude: UnitData = {
   HP: 100,
-  PM: 6,
-  PA: 6,
+  MP: 6,
+  AP: 6,
   spells: "Deadly javelin",
   frame: 0,
   type: "Dude",
@@ -62,8 +62,8 @@ export const dude: UnitData = {
 
 export const princess: UnitData = {
   HP: 50,
-  PM: 3,
-  PA: 6,
+  MP: 3,
+  AP: 6,
   spells: "Sting",
   frame: 4,
   type: "Princess",

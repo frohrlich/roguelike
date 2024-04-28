@@ -16,14 +16,14 @@ export class UnitStatDisplay extends UIElement {
     this.text = this.addText(
       1,
       false,
-      `AP: ${this.unit.pa}\nMP: ${this.unit.pm}\nHP: ${this.unit.hp}`
+      `AP: ${this.unit.ap}\nMP: ${this.unit.mp}\nHP: ${this.unit.hp}`
     );
     this.text.y = this.unitName.getBottomLeft().y + this.marginY / 2;
   }
 
   displayStats() {
     this.unitName.text = this.unit.type;
-    this.text.text = `AP: ${this.unit.pa}\nMP: ${this.unit.pm}\nHP: ${this.unit.hp}`;
+    this.text.text = `AP: ${this.unit.ap}\nMP: ${this.unit.mp}\nHP: ${this.unit.hp}`;
     this.text.y = this.unitName.getBottomLeft().y + this.marginY / 2;
   }
 

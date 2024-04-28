@@ -125,24 +125,24 @@ export class UISpell extends UIElement {
       addText = `\n+${this.spell.heal} HP`;
       text += addText;
     }
-    // spell malus PA
-    if (this.spell.malusPA > 0) {
-      addText = `\n-${this.spell.malusPA} AP`;
+    // spell malus AP
+    if (this.spell.malusAP > 0) {
+      addText = `\n-${this.spell.malusAP} AP`;
       text += addText;
     }
-    // spell bonus PA
-    if (this.spell.bonusPA > 0) {
-      addText = `\n+${this.spell.bonusPA} AP`;
+    // spell bonus AP
+    if (this.spell.bonusAP > 0) {
+      addText = `\n+${this.spell.bonusAP} AP`;
       text += addText;
     }
     // spell malus MP
-    if (this.spell.malusPM > 0) {
-      addText = `\n-${this.spell.malusPM} MP`;
+    if (this.spell.malusMP > 0) {
+      addText = `\n-${this.spell.malusMP} MP`;
       text += addText;
     }
     // spell bonus MP
-    if (this.spell.bonusPM > 0) {
-      addText = `\n+${this.spell.bonusPM} MP`;
+    if (this.spell.bonusMP > 0) {
+      addText = `\n+${this.spell.bonusMP} MP`;
       text += addText;
     }
     // spell effect over time
@@ -266,7 +266,7 @@ export class UISpell extends UIElement {
   isInaccessible() {
     return (
       this.disabled ||
-      this.battleScene.currentPlayer.pa < this.spell.cost ||
+      this.battleScene.currentPlayer.ap < this.spell.cost ||
       this.spell.cooldown > 0
     );
   }

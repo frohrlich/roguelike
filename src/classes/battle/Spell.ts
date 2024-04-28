@@ -1,6 +1,5 @@
 import { UnitData } from "../../data/UnitData";
 import { EffectOverTime } from "./EffectOverTime";
-import { Unit } from "./Unit";
 
 export class Spell {
   frame: number;
@@ -13,11 +12,11 @@ export class Spell {
   // true if spell is cast in a straight line only
   straightLine: boolean;
   damage: number;
-  malusPM: number;
-  malusPA: number;
+  malusMP: number;
+  malusAP: number;
   heal: number;
-  bonusPA: number;
-  bonusPM: number;
+  bonusAP: number;
+  bonusMP: number;
   // area of effect type (mono target by default)
   aoe: string;
   aoeSize: number;
@@ -38,11 +37,11 @@ export class Spell {
     lineOfSight: boolean,
     straightLine: boolean,
     damage: number,
-    malusPM: number = 0,
-    malusPA: number = 0,
+    malusMP: number = 0,
+    malusAP: number = 0,
     heal: number = 0,
-    bonusPA: number = 0,
-    bonusPM: number = 0,
+    bonusAP: number = 0,
+    bonusMP: number = 0,
     aoe: string = "monoTarget",
     aoeSize: number = 0,
     maxCooldown: number = 0,
@@ -58,11 +57,11 @@ export class Spell {
     this.lineOfSight = lineOfSight;
     this.straightLine = straightLine;
     this.damage = damage;
-    this.malusPM = malusPM;
-    this.malusPA = malusPA;
+    this.malusMP = malusMP;
+    this.malusAP = malusAP;
     this.heal = heal;
-    this.bonusPA = bonusPA;
-    this.bonusPM = bonusPM;
+    this.bonusAP = bonusAP;
+    this.bonusMP = bonusMP;
     this.aoe = aoe;
     this.aoeSize = aoeSize;
     this.maxCooldown = maxCooldown;

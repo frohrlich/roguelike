@@ -26,7 +26,7 @@ export class Npc extends Unit {
     if (!this.isDead()) {
       // first try to launch spell if there is a target available
       const spell = this.spells[0];
-      if (this.pa >= spell.cost && spell.cooldown <= 0) {
+      if (this.ap >= spell.cost && spell.cooldown <= 0) {
         let target = this.locateTarget(spell);
         if (target) {
           let targetVec = new Phaser.Math.Vector2(target.x, target.y);
@@ -66,12 +66,12 @@ export class Npc extends Unit {
 
   // attempts to find an accessible tile and move to it
   tryToMove() {
-    if (this.pm > 0) {
+    if (this.mp > 0) {
       const startVec = new Phaser.Math.Vector2(this.indX, this.indY);
       // first calculate the accessible tiles around npc
       let accessibleTiles = this.myScene.calculateAccessibleTiles(
         startVec,
-        this.pm
+        this.mp
       );
       // then chooses one randomly
       if (accessibleTiles.length > 0) {

@@ -4,31 +4,31 @@ export class EffectOverTime {
   frame: number;
   duration: number;
   damage: number;
-  malusPA: number;
-  malusPM: number;
+  malusAP: number;
+  malusMP: number;
   heal: number;
-  bonusPA: number;
-  bonusPM: number;
+  bonusAP: number;
+  bonusMP: number;
 
   constructor(
     name: string,
     frame: number,
     duration: number,
     damage: number,
-    malusPA: number,
-    malusPM: number,
+    malusAP: number,
+    malusMP: number,
     heal: number,
-    bonusPA: number,
-    bonusPM: number
+    bonusAP: number,
+    bonusMP: number
   ) {
     this.name = name;
     this.frame = frame;
     this.duration = duration;
     this.damage = damage;
-    this.malusPA = malusPA;
-    this.malusPM = malusPM;
+    this.malusAP = malusAP;
+    this.malusMP = malusMP;
     this.heal = heal;
-    this.bonusPA = bonusPA;
-    this.bonusPM = bonusPM;
+    this.bonusAP = bonusAP;
+    this.bonusMP = bonusMP;
   }
 }

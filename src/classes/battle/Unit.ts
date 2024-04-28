@@ -19,11 +19,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
   indX: number;
   indY: number;
   // movement points
-  maxPm: number;
-  pm: number;
+  maxMp: number;
+  mp: number;
   // action points
-  maxPa: number;
-  pa: number;
+  maxAp: number;
+  ap: number;
   // health points
   maxHp: number;
   hp: number;
@@ -60,8 +60,8 @@ export class Unit extends Phaser.GameObjects.Sprite {
     frame: number,
     indX: number,
     indY: number,
-    maxPm: number,
-    maxPa: number,
+    maxMp: number,
+    maxAp: number,
     maxHp: number,
     isAlly: boolean
   ) {
@@ -70,10 +70,10 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.indX = indX;
     this.indY = indY;
     this.textureStr = texture;
-    this.maxPm = maxPm;
-    this.maxPa = maxPa;
-    this.pa = maxPa;
-    this.pm = maxPm;
+    this.maxMp = maxMp;
+    this.maxAp = maxAp;
+    this.ap = maxAp;
+    this.mp = maxMp;
     this.maxHp = maxHp;
     this.hp = maxHp;
     this.direction = "";
@@ -125,13 +125,13 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   // refills movement points at turn beginning
   refillPoints() {
-    this.pm = this.maxPm;
-    this.pa = this.maxPa;
+    this.mp = this.maxMp;
+    this.ap = this.maxAp;
   }
 
   // move along a path
   moveAlong(path: Phaser.Math.Vector2[]) {
-    if (!path || path.length <= 0 || path.length > this.pm) {
+    if (!path || path.length <= 0 || path.length > this.mp) {
       if (this.isMoving) {
         // when end of path is reached, start the chain of movement tweens
         this.scene.tweens.chain(this.moveChain);
@@ -143,7 +143,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.moveTo(this.movePath.shift()!);
   }
 
-  // check next direction to take, update tile position and pm,
+  // check next direction to take, update tile position and mp,
   // and call move function that adds the actual movement to the tween chain
   moveTo(target: Phaser.Math.Vector2) {
     this.myScene.removeFromObstacleLayer(this);
@@ -153,26 +153,26 @@ export class Unit extends Phaser.GameObjects.Sprite {
       this.direction = "left";
       this.move(this.direction);
       this.indX--;
-      this.pm--;
+      this.mp--;
     }
     // right
     else if (this.indX - x == -1) {
       this.direction = "right";
       this.move(this.direction);
       this.indX++;
-      this.pm--;
+      this.mp--;
       // down
     } else if (this.indY - y == -1) {
       this.direction = "down";
       this.move(this.direction);
       this.indY++;
-      this.pm--;
+      this.mp--;
       // up
     } else if (this.indY - y == 1) {
       this.direction = "up";
       this.move(this.direction);
       this.indY--;
-      this.pm--;
+      this.mp--;
     }
     this.myScene.addToObstacleLayer(
       new Phaser.Math.Vector2(this.indX, this.indY)
@@ -289,7 +289,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   // cast a spell at specified position
   castSpell(spell: Spell, targetVec: Phaser.Math.Vector2) {
-    this.pa -= spell.cost;
+    this.ap -= spell.cost;
     spell.cooldown = spell.maxCooldown;
     this.lookAtTile(targetVec);
     this.startSpellCastAnimation(this.direction);
@@ -336,21 +336,21 @@ export class Unit extends Phaser.GameObjects.Sprite {
   undergoSpell(spell: Spell) {
     this.hp -= spell.damage;
     this.hp = Math.min(this.hp + spell.heal, this.maxHp);
-    this.pm -= spell.malusPM;
-    this.pm += spell.bonusPM;
-    this.pa -= spell.malusPA;
-    this.pa += spell.bonusPA;
+    this.mp -= spell.malusMP;
+    this.mp += spell.bonusMP;
+    this.ap -= spell.malusAP;
+    this.ap += spell.bonusAP;
     if (spell.effectOverTime) {
       this.addEffectOverTime(spell.effectOverTime);
     }
     this.updateHealthBar();
     this.displaySpellEffect(
       spell.damage,
-      spell.malusPM,
-      spell.malusPA,
+      spell.malusMP,
+      spell.malusAP,
       spell.heal,
-      spell.bonusPM,
-      spell.bonusPA
+      spell.bonusMP,
+      spell.bonusAP
     );
     this.refreshUI();
     this.checkDead();
@@ -431,19 +431,19 @@ export class Unit extends Phaser.GameObjects.Sprite {
       this.hp -= eot.damage;
       // no healing over max hp
       this.hp = Math.min(this.hp + eot.heal, this.maxHp);
-      this.pa -= eot.malusPA;
-      this.pa += eot.bonusPA;
-      this.pm -= eot.malusPM;
-      this.pm += eot.bonusPM;
+      this.ap -= eot.malusAP;
+      this.ap += eot.bonusAP;
+      this.mp -= eot.malusMP;
+      this.mp += eot.bonusMP;
       this.updateHealthBar();
       eot.duration--;
       this.displaySpellEffect(
         eot.damage,
-        eot.malusPM,
-        eot.malusPA,
+        eot.malusMP,
+        eot.malusAP,
         eot.heal,
-        eot.bonusPM,
-        eot.bonusPA
+        eot.bonusMP,
+        eot.bonusAP
       );
       this.refreshUI();
       if (eot.duration <= 0) {
@@ -457,11 +457,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
   // display damage animation when unit is hit
   displaySpellEffect(
     damage: number,
-    malusPM: number,
-    malusPA: number,
+    malusMP: number,
+    malusAP: number,
     heal: number,
-    bonusPM: number,
-    bonusPA: number
+    bonusMP: number,
+    bonusAP: number
   ) {
     let dmgDelay = 0;
     const scene = this.scene;
@@ -479,30 +479,30 @@ export class Unit extends Phaser.GameObjects.Sprite {
           healDelay = 400;
         }
         scene.time.delayedCall(healDelay, () => {
-          let pmDelay = 0;
-          // display PM malus in white
-          if (malusPM > 0) {
-            this.displayEffect(scene, malusPM, "pm");
-            pmDelay = 400;
+          let mpDelay = 0;
+          // display MP malus in white
+          if (malusMP > 0) {
+            this.displayEffect(scene, malusMP, "mp");
+            mpDelay = 400;
           }
-          scene.time.delayedCall(pmDelay, () => {
-            let bonusPmDelay = 0;
-            // display PM bonus in white
-            if (bonusPM > 0) {
-              this.displayEffect(scene, bonusPM, "pm", false, true);
-              bonusPmDelay = 400;
+          scene.time.delayedCall(mpDelay, () => {
+            let bonusMpDelay = 0;
+            // display MP bonus in white
+            if (bonusMP > 0) {
+              this.displayEffect(scene, bonusMP, "mp", false, true);
+              bonusMpDelay = 400;
             }
-            scene.time.delayedCall(bonusPmDelay, () => {
-              let paDelay = 0;
-              // display PA malus in blue
-              if (malusPA > 0) {
-                this.displayEffect(scene, malusPA, "pa");
-                paDelay = 400;
+            scene.time.delayedCall(bonusMpDelay, () => {
+              let apDelay = 0;
+              // display AP malus in blue
+              if (malusAP > 0) {
+                this.displayEffect(scene, malusAP, "ap");
+                apDelay = 400;
               }
-              scene.time.delayedCall(paDelay, () => {
-                // display PA bonus in blue
-                if (bonusPA > 0) {
-                  this.displayEffect(scene, bonusPA, "pa", false, true);
+              scene.time.delayedCall(apDelay, () => {
+                // display AP bonus in blue
+                if (bonusAP > 0) {
+                  this.displayEffect(scene, bonusAP, "ap", false, true);
                 }
               });
             });
@@ -529,10 +529,10 @@ export class Unit extends Phaser.GameObjects.Sprite {
       case "heal":
         color = 0x00dd00;
         break;
-      case "pm":
+      case "mp":
         color = 0xffffff;
         break;
-      case "pa":
+      case "ap":
         color = 0x33c6f7;
         break;
       default:
