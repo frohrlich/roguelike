@@ -41,44 +41,44 @@ export class BootScene extends Phaser.Scene {
     });
 
     // map tiles
-    this.load.image("tiles", "assets/map/spritesheet.png");
+    this.load.image("tiles", "public/assets/map/spritesheet.png");
 
     // maps in json format
     this.load.tilemapTiledJSON(
       "forest_battlemap1",
-      "assets/map/forest_battlemap1.json"
+      "public/assets/map/forest_battlemap1.json"
     );
     this.load.tilemapTiledJSON(
       "forest_battlemap2",
-      "assets/map/forest_battlemap2.json"
+      "public/assets/map/forest_battlemap2.json"
     );
     this.load.tilemapTiledJSON(
       "forest_battlemap3",
-      "assets/map/forest_battlemap3.json"
+      "public/assets/map/forest_battlemap3.json"
     );
 
     // characters and 16x16 icons
-    this.load.spritesheet("player", "assets/RPG_assets.png", {
+    this.load.spritesheet("player", "public/assets/images/RPG_assets.png", {
       frameWidth: 16,
       frameHeight: 16,
     });
 
     // illustrations
-    this.load.image("princess", "assets/images/princess.png");
-    this.load.image("AmazonIllus", "assets/images/amazon.png");
-    this.load.image("RenegadeIllus", "assets/images/renegade.png");
-    this.load.image("StrangerIllus", "assets/images/stranger.png");
+    this.load.image("princess", "public/assets/images/princess.png");
+    this.load.image("AmazonIllus", "public/assets/images/amazon.png");
+    this.load.image("RenegadeIllus", "public/assets/images/renegade.png");
+    this.load.image("StrangerIllus", "public/assets/images/stranger.png");
 
     // fonts
     this.load.bitmapFont(
       "dogicapixel",
-      "assets/fonts/dogicapixel.png",
-      "assets/fonts/dogicapixel.xml"
+      "public/assets/fonts/dogicapixel.png",
+      "public/assets/fonts/dogicapixel.xml"
     );
     this.load.bitmapFont(
       "dogicapixelbold",
-      "assets/fonts/dogicapixelbold.png",
-      "assets/fonts/dogicapixelbold.xml"
+      "public/assets/fonts/dogicapixelbold.png",
+      "public/assets/fonts/dogicapixelbold.xml"
     );
   }
 

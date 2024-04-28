@@ -1,5 +1,5 @@
 {
-  "name": "le_ours",
+  "name": "roguelike",
   "version": "0.0.1",
   "description": "A roguelike tactical RPG with cards made with Phaser 3",
   "main": "index.js",

@@ -2,6 +2,7 @@
 
 # Compiled output
 /dist
+public/js/app.js
 /tmp
 /out-tsc
 /bazel-out
@@ -42,4 +43,4 @@ testem.log
 Thumbs.db
 
 # Data
-assets/RPG_assets.kra
+public/assets/images/RPG_assets.kra

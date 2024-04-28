@@ -1,8 +1,8 @@
 @font-face {
   font-family: "dogicapixel";
-  src: url("assets/fonts/Dogica_Pixel.woff2") format("woff2"),
-    url("assets/fonts/Dogica_Pixel.woff") format("woff"),
-    url("assets/fonts/Dogica_Pixel.ttf") format("truetype");
+  src: url("../assets/fonts/Dogica_Pixel.woff2") format("woff2"),
+    url("../assets/fonts/Dogica_Pixel.woff") format("woff"),
+    url("../assets/fonts/Dogica_Pixel.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -10,9 +10,9 @@
 
 @font-face {
   font-family: "dogicapixel";
-  src: url("assets/fonts/Dogica_Pixel_Bold.woff2") format("woff2"),
-    url("assets/fonts/Dogica_Pixel_Bold.woff") format("woff"),
-    url("assets/fonts/Dogica_Pixel_Bold.ttf") format("truetype");
+  src: url("../assets/fonts/Dogica_Pixel_Bold.woff2") format("woff2"),
+    url("../assets/fonts/Dogica_Pixel_Bold.woff") format("woff"),
+    url("../assets/fonts/Dogica_Pixel_Bold.ttf") format("truetype");
   font-weight: bold;
   font-style: normal;
   font-display: swap;
