@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
 import { findUnitDataByType } from "../data/UnitData";
-import { DeckService } from "../services/deckService";
+import { DeckService } from "../services/DeckService";
 
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;

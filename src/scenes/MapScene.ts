@@ -9,11 +9,16 @@ export class MapScene extends Phaser.Scene {
   }
 
   create(data: any) {
+    this.createBackground();
     this.currentCharacterChoice = data.playerType;
     this.createWorldDescription();
     this.drawDottedLine();
     this.createLocationIcons();
     this.createStartButton();
+  }
+
+  createBackground() {
+    this.add.image(0, 0, "forest_background").setOrigin(0, 0).setTint(0x555555);
   }
 
   createStartButton() {
