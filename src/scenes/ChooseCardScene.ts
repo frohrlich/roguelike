@@ -77,7 +77,7 @@ export class ChooseCardScene extends Phaser.Scene {
           this.scene.start("MapScene");
         } else {
           this.scene.start("BattleScene", {
-            enemyType: "Dude",
+            enemyType: "Pig",
           });
         }
       });

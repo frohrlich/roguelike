@@ -50,14 +50,14 @@ export const snowman: UnitData = {
   description: "Snow !",
 };
 
-export const dude: UnitData = {
+export const pig: UnitData = {
   HP: 100,
   MP: 6,
   AP: 6,
   spells: "Deadly javelin",
   frame: 0,
-  type: "Dude",
-  description: "Just some dude.",
+  type: "Pig",
+  description: "Just some pig.",
 };
 
 export const princess: UnitData = {
@@ -70,7 +70,7 @@ export const princess: UnitData = {
   description: "A typical princess.",
 };
 
-const availableUnits = [amazon, renegade, stranger, snowman, dude, princess];
+const availableUnits = [amazon, renegade, stranger, snowman, pig, princess];
 
 export const findUnitDataByType = (type: string) => {
   return availableUnits.find((unitData) => unitData.type === type);
