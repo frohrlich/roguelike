@@ -30,6 +30,7 @@ export class MapScene extends Phaser.Scene {
         "Start !",
         32
       )
+      .setDepth(1)
       .setOrigin(0.5, 0.5);
     const buttonMargin = 12;
     const chooseButton = this.add
@@ -41,7 +42,6 @@ export class MapScene extends Phaser.Scene {
         0x00aa00
       )
       .setStrokeStyle(2, 0xffffff)
-      .setDepth(-1)
       .setOrigin(0.5, 0.5)
       .setInteractive()
       .on("pointerup", () => {

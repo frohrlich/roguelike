@@ -74,12 +74,9 @@ export class ChooseCardScene extends Phaser.Scene {
       .on("pointerup", () => {
         DeckService.addCard(this.currentCardChoice);
         if (this.isStarting) {
-          this.scene.start("MapScene", {
-            playerType: this.currentCardChoice,
-          });
+          this.scene.start("MapScene");
         } else {
           this.scene.start("BattleScene", {
-            playerType: this.currentCardChoice,
             enemyType: "Dude",
           });
         }

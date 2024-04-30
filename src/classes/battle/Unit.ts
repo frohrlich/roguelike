@@ -13,6 +13,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   healthBarScale = 1.2;
 
   selectedTint = 0x777777;
+  grabbedTint = 0x6666ff;
 
   myScene: BattleScene;
   // position on the grid
@@ -47,6 +48,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   effectIcon: Phaser.GameObjects.Image;
   summonedUnits: Unit[] = [];
   isSelected: boolean;
+  isGrabbed = false;
 
   private readonly blueTeamIdentifierFrame = 45;
 
@@ -93,6 +95,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.moveChain.tweens = [];
 
     this.addHoverEvents();
+    if (this.isAlly) {
+      this.addClickEvents();
+    }
   }
 
   addHoverEvents() {
@@ -104,20 +109,52 @@ export class Unit extends Phaser.GameObjects.Sprite {
     });
   }
 
+  addClickEvents() {
+    this.on("pointerup", () => {
+      const prevGrab = this.myScene.findPreviouslyGrabbedUnit();
+      if (!prevGrab) {
+        this.grabUnit();
+      } else if (prevGrab === this) {
+        this.ungrabUnit();
+      }
+    });
+  }
+
+  ungrabUnit() {
+    this.isGrabbed = false;
+    if (this.isSelected) {
+      this.tint = this.selectedTint;
+      this.timelineSlot.tint = this.selectedTint;
+    } else {
+      this.tint = 0xffffff;
+      this.timelineSlot.tint = 0xffffff;
+    }
+  }
+
+  grabUnit() {
+    this.isGrabbed = true;
+    this.tint = this.grabbedTint;
+    this.timelineSlot.tint = this.grabbedTint;
+  }
+
   /** On select, highlight unit, show healthbar and effect icon, and show unit stats in UI. */
   selectUnit() {
     this.isSelected = true;
-    this.tint = this.selectedTint;
-    this.timelineSlot.tint = this.selectedTint;
-    this.healthBar.setVisible(true);
+    if (!this.isGrabbed) {
+      this.tint = this.selectedTint;
+      this.timelineSlot.tint = this.selectedTint;
+    }
+    if (!this.myScene.isInPreparationPhase) this.healthBar.setVisible(true);
     if (this.effectIcon) this.effectIcon.setVisible(true);
     this.myScene.uiScene.changeStatsUnit(this);
   }
 
   unselectUnit() {
     this.isSelected = false;
-    this.tint = 0xffffff;
-    this.timelineSlot.tint = 0xffffff;
+    if (!this.isGrabbed) {
+      this.tint = 0xffffff;
+      this.timelineSlot.tint = 0xffffff;
+    }
     this.healthBar.setVisible(false);
     if (this.effectIcon) this.effectIcon.setVisible(false);
     this.myScene.uiScene.changeStatsUnit(this.myScene.currentPlayer);
@@ -574,6 +611,10 @@ export class Unit extends Phaser.GameObjects.Sprite {
     });
     this.unselectUnit();
     this.myScene.removeUnitFromBattle(this);
+    if (this === this.myScene.currentPlayer) {
+      this.myScene.endTurn();
+      this.myScene.clearSpellRange();
+    }
     // turn black before dying...
     this.tint = 0x000000;
     this.scene.time.delayedCall(
@@ -582,10 +623,10 @@ export class Unit extends Phaser.GameObjects.Sprite {
         if (this.myScene.gameIsOver()) {
           this.myScene.gameOver();
         }
-        this.destroyUnit();
         if (this.myScene.battleIsFinished()) {
           this.myScene.endBattle();
         }
+        this.destroyUnit();
       },
       undefined,
       this
@@ -603,6 +644,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
   // look at a position (change player direction)
   lookAtTile(targetVec: Phaser.Math.Vector2) {
     let direction = "";
+    if (targetVec.x === this.indX && targetVec.y === this.indY) {
+      return;
+    }
     // upper right corner
     if (targetVec.x >= this.indX && targetVec.y <= this.indY) {
       if (targetVec.x + targetVec.y < this.indX + this.indY) {

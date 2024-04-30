@@ -8,6 +8,7 @@ import { BattleUIScene } from "./BattleUIScene";
 import isVisible from "../utils/lineOfSight";
 import { UnitData, findUnitDataByType } from "../data/UnitData";
 import { decodeSpellString } from "../data/SpellData";
+import { DeckService } from "../services/DeckService";
 
 // Store a tile and the path to it
 interface TilePath {
@@ -44,6 +45,7 @@ export class BattleScene extends Phaser.Scene {
   grid: Phaser.GameObjects.Grid;
   playerStarterTiles: Phaser.Tilemaps.Tile[];
   enemyStarterTiles: Phaser.Tilemaps.Tile[];
+  isInPreparationPhase: boolean;
 
   constructor() {
     super({
@@ -56,8 +58,9 @@ export class BattleScene extends Phaser.Scene {
   create(data: any): void {
     // refresh scene to its original state
     this.timelineIndex = 0;
-    this.isPlayerTurn = true;
+    this.isPlayerTurn = false;
     this.spellVisible = false;
+    this.isInPreparationPhase = true;
 
     this.createTilemap();
     this.addUnitsOnStart(data);
@@ -68,8 +71,6 @@ export class BattleScene extends Phaser.Scene {
 
     // game grid
     this.addGrid(zoom);
-
-    this.addSpellUnselectListener();
 
     // create the timeline
     this.timeline = createTimeline(this.allies, this.enemies);
@@ -160,13 +161,40 @@ export class BattleScene extends Phaser.Scene {
 
       // on click, teleport to new starter position
       overlay.on("pointerup", () => {
-        this.currentPlayer.teleportToPosition(tile.x, tile.y);
+        const grabbedCharacter = this.timeline.find((unit) => unit.isGrabbed);
+        if (grabbedCharacter) {
+          // if unit already there, swap positions
+          if (this.isUnitThere(tile.x, tile.y)) {
+            this.getUnitAtPos(tile.x, tile.y).teleportToPosition(
+              grabbedCharacter.indX,
+              grabbedCharacter.indY
+            );
+          }
+          grabbedCharacter.teleportToPosition(tile.x, tile.y);
+          grabbedCharacter.ungrabUnit();
+        }
       });
       overlay.on("pointerover", () => {
         tile.tint = 0x0000ff;
       });
       overlay.on("pointerout", () => {
         tile.tint = 0xffffff;
+      });
+    });
+
+    this.allies.forEach((unit) => {
+      unit.on("pointerup", () => {
+        const grabbedCharacter = this.timeline.find((unit) => unit.isGrabbed);
+        if (grabbedCharacter && grabbedCharacter !== unit) {
+          // if unit already there, swap positions
+          const prevX = unit.indX;
+          const prevY = unit.indY;
+          unit.teleportToPosition(grabbedCharacter.indX, grabbedCharacter.indY);
+          unit.unselectUnit();
+          grabbedCharacter.teleportToPosition(prevX, prevY);
+          grabbedCharacter.ungrabUnit();
+          grabbedCharacter.selectUnit();
+        }
       });
     });
 
@@ -246,20 +274,27 @@ export class BattleScene extends Phaser.Scene {
 
   // play this after player chose starter position and pressed start button
   startBattle() {
+    this.isInPreparationPhase = false;
+    this.ungrabPreviouslyGrabbedUnit();
+    this.clearPointerEvents();
     this.clearOverlay();
     this.enemyStarterTiles = [];
     this.playerStarterTiles = [];
     this.displayBattleStartScreen();
-    this.refreshAccessibleTiles();
-    this.highlightAccessibleTiles(this.accessibleTiles);
+    this.addSpellUnselectListener();
     this.highlightCurrentUnitInTimeline();
+    const firstCharacter = this.timeline[0];
+    if (firstCharacter instanceof Player) {
+      this.startPlayerTurn(firstCharacter);
+      this.uiScene.refreshSpells();
+    }
     this.uiScene.startBattle();
+    firstCharacter.playTurn();
   }
 
   // end turn after clicking end turn button (for player) or finishing actions (for npcs)
   endTurn = () => {
     this.uiScene.refreshUI();
-    this.uiScene.clearSpellsHighlight();
     // clear previous player highlight on the timeline
     let prevPlayer = this.timeline[this.timelineIndex];
     if (prevPlayer) {
@@ -290,18 +325,25 @@ export class BattleScene extends Phaser.Scene {
     this.calculatePlayerStarterTiles();
     this.calculateEnemyStarterTiles();
 
-    // player
-    const playerData = findUnitDataByType(data.playerType);
-    if (playerData) {
-      const randTile = Phaser.Math.RND.between(
-        0,
-        this.playerStarterTiles.length - 1
-      );
-      const { x, y } = this.playerStarterTiles[randTile];
-      this.currentPlayer = this.addUnit(playerData, x, y, false, true);
-    } else {
-      throw new Error("Error : unit not found");
-    }
+    // we retrieve the player characters from the deck list
+    DeckService.cards.forEach((card: string) => {
+      const playerData = findUnitDataByType(card);
+      if (playerData) {
+        let x: number, y: number;
+        do {
+          const randTile = Phaser.Math.RND.between(
+            0,
+            this.playerStarterTiles.length - 1
+          );
+          const tile = this.playerStarterTiles[randTile];
+          x = tile.x;
+          y = tile.y;
+        } while (this.isUnitThere(x, y));
+        this.addUnit(playerData, x, y, false, true);
+      } else {
+        throw new Error("Error : unit not found");
+      }
+    });
 
     // enemy
     const enemyData = findUnitDataByType(data.enemyType);
@@ -1082,6 +1124,7 @@ export class BattleScene extends Phaser.Scene {
     this.clearAllUnits();
     this.map.destroy();
     this.grid.destroy();
+    this.currentPlayer = null;
     this.scene.stop("BattleUIScene");
   }
 
@@ -1092,6 +1135,18 @@ export class BattleScene extends Phaser.Scene {
   battleIsFinished() {
     return this.enemies.length === 0;
   }
+
+  ungrabPreviouslyGrabbedUnit() {
+    this.findPreviouslyGrabbedUnit()?.ungrabUnit();
+  }
+
+  findPreviouslyGrabbedUnit() {
+    return this.timeline.find((unit) => unit.isGrabbed);
+  }
+
+  isThereAGrabbedUnitAlready() {
+    return this.timeline.some((unit) => unit.isGrabbed);
+  }
 }
 
 // play order : alternate between allies and enemies
@@ -1099,11 +1154,11 @@ let createTimeline = (allies: Unit[], enemies: Unit[]) => {
   const maxSize = Math.max(allies.length, enemies.length);
   let timeline: Unit[] = [];
   for (let i = 0; i < maxSize; i++) {
-    if (allies.length > i) {
-      timeline.push(allies[i]);
-    }
     if (enemies.length > i) {
       timeline.push(enemies[i]);
+    }
+    if (allies.length > i) {
+      timeline.push(allies[i]);
     }
   }
   return timeline;

@@ -38,14 +38,13 @@ export class BattleUIScene extends Phaser.Scene {
 
   create(): void {
     this.battleScene = this.scene.get("BattleScene") as BattleScene;
+    this.unitStats = null;
+    this.uiSpells = [];
     this.mapWidth = this.battleScene.map.widthInPixels;
     this.drawOutline();
     this.createStartButton();
     this.updateTimeline(this.battleScene.timeline, true);
-    this.unitStats = this.addStats(0, 0, this.battleScene.currentPlayer);
     const spellTitle = new UIText(this, 1, 0, "Spells");
-    this.refreshSpells();
-    this.disableSpells(true);
   }
 
   disableSpells(isDisabled: boolean) {
@@ -65,7 +64,11 @@ export class BattleUIScene extends Phaser.Scene {
   }
 
   changeStatsUnit(unit: Unit) {
-    this.unitStats.changeUnit(unit);
+    if (!this.unitStats) {
+      this.unitStats = this.addStats(0, 0, unit);
+    } else {
+      this.unitStats.changeUnit(unit);
+    }
   }
 
   createStartButton() {
@@ -110,7 +113,6 @@ export class BattleUIScene extends Phaser.Scene {
   startBattle() {
     this.createEndTurnButton();
     this.activateEndTurnButtonVisually();
-    this.refreshSpells();
   }
 
   /** Changes start button to end turn button for the main phase of the battle. */
@@ -286,6 +288,7 @@ export class BattleUIScene extends Phaser.Scene {
   }
 
   endPlayerTurn() {
+    this.clearSpellsHighlight();
     this.refreshSpells();
     this.disableSpells(true);
     this.deactivateEndTurnButtonVisually();
@@ -293,17 +296,17 @@ export class BattleUIScene extends Phaser.Scene {
 
   startPlayerTurn() {
     this.activateEndTurnButtonVisually();
-    this.disableSpells(false);
+    this.changeStatsUnit(this.battleScene.currentPlayer);
     this.refreshSpells();
+    this.disableSpells(false);
     this.refreshUI();
   }
 
   refreshUI() {
-    this.changeStatsUnit(this.battleScene.currentPlayer);
-    this.uiSpells.forEach((uiSpell) => {
+    this.uiSpells?.forEach((uiSpell) => {
       uiSpell.refresh();
     });
-    this.unitStats.refresh();
+    this.unitStats?.refresh();
   }
 
   refreshUIAfterSpell(spell: Spell) {

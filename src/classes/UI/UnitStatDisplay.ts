@@ -22,9 +22,14 @@ export class UnitStatDisplay extends UIElement {
   }
 
   displayStats() {
-    this.unitName.text = this.unit.type;
-    this.text.text = `AP: ${this.unit.ap}\nMP: ${this.unit.mp}\nHP: ${this.unit.hp}`;
-    this.text.y = this.unitName.getBottomLeft().y + this.marginY / 2;
+    if (this.unit) {
+      this.unitName.text = this.unit.type;
+      this.text.text = `AP: ${this.unit.ap}\nMP: ${this.unit.mp}\nHP: ${this.unit.hp}`;
+      this.text.y = this.unitName.getBottomLeft().y + this.marginY / 2;
+    } else {
+      this.unitName.text = "";
+      this.text.text = "";
+    }
   }
 
   override refresh() {
