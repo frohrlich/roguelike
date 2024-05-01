@@ -73,13 +73,7 @@ export class ChooseCardScene extends Phaser.Scene {
       .setInteractive()
       .on("pointerup", () => {
         DeckService.addCard(this.currentCardChoice);
-        if (this.isStarting) {
-          this.scene.start("MapScene");
-        } else {
-          this.scene.start("BattleScene", {
-            enemyType: "Pig",
-          });
-        }
+        this.scene.start("MapScene");
       });
 
     // add character description on bottom

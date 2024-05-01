@@ -109,12 +109,6 @@ export class BattleUIScene extends Phaser.Scene {
     this.buttonText.tint = this.uiFontColor;
   }
 
-  /** Play this when battle preparation phase ends. */
-  startBattle() {
-    this.createEndTurnButton();
-    this.activateEndTurnButtonVisually();
-  }
-
   /** Changes start button to end turn button for the main phase of the battle. */
   createEndTurnButton() {
     this.deactivateEndTurnButtonVisually();

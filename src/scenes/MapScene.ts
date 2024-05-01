@@ -1,20 +1,39 @@
 import Phaser from "phaser";
+import { MapService } from "../services/MapService";
 
 export class MapScene extends Phaser.Scene {
-  currentCharacterChoice: string;
+  locationCount = 3;
+  locationSize = 60;
+  discoveredLocationColor = 0x00ff00;
+  undiscoveredLocationColor = 0x999999;
+  locationFontSize = 16;
+  innerRectangleLineWidth = 7;
+  iconsPosYFactor = 2.2;
+
+  locationNames: string[] = [];
+
   constructor() {
     super({
       key: "MapScene",
     });
   }
 
-  create(data: any) {
+  create() {
+    if (MapService.position === 0) {
+      this.locationNames = [];
+      this.initializeLocationNames();
+    }
     this.createBackground();
-    this.currentCharacterChoice = data.playerType;
     this.createWorldDescription();
     this.drawDottedLine();
     this.createLocationIcons();
     this.createStartButton();
+  }
+
+  initializeLocationNames() {
+    for (let i = 0; i < this.locationCount; i++) {
+      this.locationNames.push(MapService.getRandomForestName());
+    }
   }
 
   createBackground() {
@@ -22,9 +41,10 @@ export class MapScene extends Phaser.Scene {
   }
 
   createStartButton() {
+    const posX = (this.game.scale.width / 6) * (1 + 2 * MapService.position);
     const chooseText = this.add
       .bitmapText(
-        this.game.scale.width / 6,
+        posX,
         (this.game.scale.height * 2) / 3,
         "dogicapixelbold",
         "Start !",
@@ -33,7 +53,7 @@ export class MapScene extends Phaser.Scene {
       .setDepth(1)
       .setOrigin(0.5, 0.5);
     const buttonMargin = 12;
-    const chooseButton = this.add
+    this.add
       .rectangle(
         chooseText.x,
         chooseText.y - buttonMargin / 2,
@@ -46,68 +66,38 @@ export class MapScene extends Phaser.Scene {
       .setInteractive()
       .on("pointerup", () => {
         this.scene.start("BattleScene", {
-          playerType: this.currentCharacterChoice,
           enemyType: "Pig",
         });
       });
   }
 
   private createLocationIcons() {
-    const size = 60;
-    const color = 0x00ff00;
-    const greyedColor = 0x999999;
-    const fontSize = 16;
-    const innerRectangleLineWidth = 7;
-    const posY = this.game.scale.height / 2.2;
-    this.add.rectangle(this.game.scale.width / 6, posY, size, size, color);
+    for (let i = 0; i < this.locationCount; i++) {
+      this.createLocation(
+        i,
+        i <= MapService.position ? this.locationNames[i] : "??",
+        i < MapService.position
+      );
+    }
+  }
+
+  private createLocation(pos: number, name: string, isDiscovered: boolean) {
+    const posX = (this.game.scale.width / 6) * (1 + 2 * pos);
+    const posY = this.game.scale.height / this.iconsPosYFactor;
+    const color = isDiscovered
+      ? this.discoveredLocationColor
+      : this.undiscoveredLocationColor;
+    this.add.rectangle(posX, posY, this.locationSize, this.locationSize, color);
     this.add
-      .rectangle(this.game.scale.width / 6, posY, size / 2, size / 2)
-      .setStrokeStyle(innerRectangleLineWidth, 0xffffff);
-    this.add
-      .bitmapText(
-        this.game.scale.width / 6,
-        posY - size,
-        "dogicapixelbold",
-        "Healthy forest",
-        fontSize
-      )
-      .setOrigin(0.5, 0.5);
-    this.add.rectangle(
-      this.game.scale.width / 2,
-      posY,
-      size,
-      size,
-      greyedColor
-    );
-    this.add
-      .rectangle(this.game.scale.width / 2, posY, size / 2, size / 2)
-      .setStrokeStyle(innerRectangleLineWidth, 0x666666);
+      .rectangle(posX, posY, this.locationSize / 2, this.locationSize / 2)
+      .setStrokeStyle(this.innerRectangleLineWidth, 0xffffff);
     this.add
       .bitmapText(
-        this.game.scale.width / 2,
-        posY - size,
+        posX,
+        posY - this.locationSize,
         "dogicapixelbold",
-        "??",
-        fontSize
-      )
-      .setOrigin(0.5, 0.5);
-    this.add.rectangle(
-      (this.game.scale.width * 5) / 6,
-      posY,
-      size,
-      size,
-      greyedColor
-    );
-    this.add
-      .rectangle((this.game.scale.width * 5) / 6, posY, size / 2, size / 2)
-      .setStrokeStyle(innerRectangleLineWidth, 0x666666);
-    this.add
-      .bitmapText(
-        (this.game.scale.width * 5) / 6,
-        posY - size,
-        "dogicapixelbold",
-        "??",
-        fontSize
+        name,
+        this.locationFontSize
       )
       .setOrigin(0.5, 0.5);
   }

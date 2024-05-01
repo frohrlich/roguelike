@@ -9,6 +9,7 @@ import isVisible from "../utils/lineOfSight";
 import { UnitData, findUnitDataByType } from "../data/UnitData";
 import { decodeSpellString } from "../data/SpellData";
 import { DeckService } from "../services/DeckService";
+import { MapService } from "../services/MapService";
 
 // Store a tile and the path to it
 interface TilePath {
@@ -283,12 +284,12 @@ export class BattleScene extends Phaser.Scene {
     this.displayBattleStartScreen();
     this.addSpellUnselectListener();
     this.highlightCurrentUnitInTimeline();
+    this.uiScene.createEndTurnButton();
     const firstCharacter = this.timeline[0];
     if (firstCharacter instanceof Player) {
       this.startPlayerTurn(firstCharacter);
       this.uiScene.refreshSpells();
     }
-    this.uiScene.startBattle();
     firstCharacter.playTurn();
   }
 
@@ -1111,12 +1112,19 @@ export class BattleScene extends Phaser.Scene {
 
   gameOver() {
     this.resetScene();
+    this.resetGameState();
     this.scene.start("BootScene");
   }
 
-  endBattle() {
+  winBattle() {
     this.resetScene();
+    MapService.incrementPosition();
     this.scene.start("ChooseCardScene", { isStarting: false });
+  }
+
+  private resetGameState() {
+    MapService.position = 0;
+    DeckService.cards = [];
   }
 
   resetScene() {
