@@ -52,7 +52,7 @@ const net = new Spell(
 const trident = new Spell(
   116,
   2,
-  3,
+  4,
   2,
   "Trident",
   true,
@@ -68,7 +68,7 @@ const trident = new Spell(
   1,
   null,
   null,
-  -2
+  -3
 );
 
 const stargazing = new Spell(

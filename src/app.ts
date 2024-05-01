@@ -7,6 +7,7 @@ import { ChooseCardScene } from "./scenes/ChooseCardScene";
 import { MapScene } from "./scenes/MapScene";
 import screenfull from "screenfull";
 import { UAParser } from "ua-parser-js";
+import { DeckScene } from "./scenes/DeckScene";
 
 export const GAME_WIDTH = 930; // xiaomi mi a3 : 19.5:9 ratio
 export const GAME_HEIGHT = 416;
@@ -32,6 +33,7 @@ const config = {
     BootScene,
     ChooseCardScene,
     MapScene,
+    DeckScene,
     BattleScene,
     BattleUIScene,
     GameOverScene,

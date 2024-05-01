@@ -15,10 +15,18 @@ export class CardUISpell extends Phaser.GameObjects.Container {
   infoText: Phaser.GameObjects.BitmapText;
   spellNameInfoText: Phaser.GameObjects.BitmapText;
   outlineRectangle: Phaser.GameObjects.Rectangle;
+  displayInfo: boolean;
 
-  constructor(scene: Phaser.Scene, x: number, y: number, spell: Spell) {
+  constructor(
+    scene: Phaser.Scene,
+    x: number,
+    y: number,
+    spell: Spell,
+    displayInfo = true
+  ) {
     super(scene, x, y);
     this.spell = spell;
+    this.displayInfo = displayInfo;
     this.addIcon();
     this.addInfoText();
     this.sendToBack(this.infoRectangle);
@@ -42,14 +50,17 @@ export class CardUISpell extends Phaser.GameObjects.Container {
       this.spell.frame
     )
       .setScale(this.scale)
-      .setAlpha(this.iconAlpha)
-      .setInteractive()
-      .on("pointerover", () => {
-        this.showInfo(true);
-      })
-      .on("pointerout", () => {
-        this.showInfo(false);
-      });
+      .setAlpha(this.iconAlpha);
+    if (this.displayInfo) {
+      this.icon
+        .setInteractive()
+        .on("pointerover", () => {
+          this.showInfo(true);
+        })
+        .on("pointerout", () => {
+          this.showInfo(false);
+        });
+    }
     this.add(this.icon);
   }
 

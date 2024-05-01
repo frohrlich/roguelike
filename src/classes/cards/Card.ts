@@ -16,17 +16,20 @@ export class Card extends Phaser.GameObjects.Container {
   unitData: UnitData;
   // if card on right of screen, character description will go to the left
   isOnRight: boolean;
+  isInChooseCardScene: boolean;
 
   constructor(
     scene: Phaser.Scene,
     x: number,
     y: number,
     unitData: UnitData,
-    isOnRight: boolean = false
+    isOnRight: boolean = false,
+    isInChooseCardScene = true
   ) {
     super(scene, x, y);
     this.unitData = unitData;
     this.isOnRight = isOnRight;
+    this.isInChooseCardScene = isInChooseCardScene;
     this.makeIllustration();
     this.makeCardOutline();
     this.makeName();
@@ -36,10 +39,12 @@ export class Card extends Phaser.GameObjects.Container {
     // uncomment this if you want character description to appear alongside card
     // this.makeDescription();
     this.setSize(this.cardWidth, this.cardHeight);
-    this.setInteractive();
-    this.on("pointerup", () => {
-      this.toggleCardView();
-    });
+    if (isInChooseCardScene) {
+      this.setInteractive();
+      this.on("pointerup", () => {
+        this.toggleCardView();
+      });
+    }
   }
 
   private toggleCardView() {
@@ -101,7 +106,8 @@ export class Card extends Phaser.GameObjects.Container {
           this.scene,
           (this.cardWidth * (i - 1)) / 3.2,
           this.cardHeight / 6,
-          spell
+          spell,
+          this.isInChooseCardScene
         ).setName("toggle")
       );
     }

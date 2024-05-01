@@ -644,11 +644,12 @@ export class Unit extends Phaser.GameObjects.Sprite {
   // look at a position (change player direction)
   lookAtTile(targetVec: Phaser.Math.Vector2) {
     let direction = "";
+    // on self
     if (targetVec.x === this.indX && targetVec.y === this.indY) {
-      return;
+      direction = "down";
     }
     // upper right corner
-    if (targetVec.x >= this.indX && targetVec.y <= this.indY) {
+    else if (targetVec.x >= this.indX && targetVec.y <= this.indY) {
       if (targetVec.x + targetVec.y < this.indX + this.indY) {
         direction = "up";
       } else {

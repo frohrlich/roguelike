@@ -43,6 +43,7 @@ export class BattleUIScene extends Phaser.Scene {
     this.mapWidth = this.battleScene.map.widthInPixels;
     this.drawOutline();
     this.createStartButton();
+    this.addDeckButton();
     this.updateTimeline(this.battleScene.timeline, true);
     const spellTitle = new UIText(this, 1, 0, "Spells");
   }
@@ -332,5 +333,55 @@ export class BattleUIScene extends Phaser.Scene {
       uiSpell.isHighlighted = false;
       uiSpell.refresh();
     });
+  }
+
+  addDeckButton() {
+    const buttonWidth = 70;
+    const buttonHeight = 40;
+    const margin = 9;
+
+    this.add
+      .graphics()
+      .fillStyle(0x1f301d)
+      .lineStyle(4, 0xffffff)
+      .fillRoundedRect(
+        this.game.scale.width - buttonWidth - margin,
+        this.game.scale.height - buttonHeight - margin,
+        buttonWidth,
+        buttonHeight,
+        5
+      )
+      .strokeRoundedRect(
+        this.game.scale.width - buttonWidth - margin,
+        this.game.scale.height - buttonHeight - margin,
+        buttonWidth,
+        buttonHeight,
+        5
+      );
+
+    // need this to click on button
+    // as graphics objects are not interactive
+    this.add
+      .rectangle(
+        this.game.scale.width - buttonWidth - margin,
+        this.game.scale.height - buttonHeight - margin,
+        buttonWidth,
+        buttonHeight
+      )
+      .setOrigin(0, 0)
+      .setInteractive()
+      .on("pointerup", () =>
+        this.scene.launch("DeckScene").bringToTop("DeckScene")
+      );
+
+    this.add
+      .bitmapText(
+        this.game.scale.width - buttonWidth / 2 - margin,
+        this.game.scale.height - buttonHeight / 2 - margin,
+        "dogicapixel",
+        "Deck",
+        16
+      )
+      .setOrigin(0.5, 0.5);
   }
 }

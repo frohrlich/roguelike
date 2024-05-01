@@ -4,7 +4,7 @@ import { MapService } from "../services/MapService";
 export class MapScene extends Phaser.Scene {
   locationCount = 3;
   locationSize = 60;
-  discoveredLocationColor = 0x00ff00;
+  discoveredLocationColor = 0x00aa00;
   undiscoveredLocationColor = 0x999999;
   locationFontSize = 16;
   innerRectangleLineWidth = 7;

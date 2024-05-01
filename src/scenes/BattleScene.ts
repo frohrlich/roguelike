@@ -82,7 +82,7 @@ export class BattleScene extends Phaser.Scene {
     });
 
     // start UI
-    this.scene.run("BattleUIScene");
+    this.scene.launch("BattleUIScene");
     this.uiScene = this.scene.get("BattleUIScene") as BattleUIScene;
 
     // and finally, player gets to choose their starter position
@@ -339,7 +339,7 @@ export class BattleScene extends Phaser.Scene {
           const tile = this.playerStarterTiles[randTile];
           x = tile.x;
           y = tile.y;
-        } while (this.isUnitThere(x, y));
+        } while (this.isAllyThere(x, y));
         this.addUnit(playerData, x, y, false, true);
       } else {
         throw new Error("Error : unit not found");
@@ -1054,6 +1054,10 @@ export class BattleScene extends Phaser.Scene {
   // return true if there is a unit at the specified position
   isUnitThere(x: number, y: number): boolean {
     return this.timeline.some((unit) => unit.indX == x && unit.indY == y);
+  }
+
+  isAllyThere(x: number, y: number): boolean {
+    return this.allies.some((unit) => unit.indX == x && unit.indY == y);
   }
 
   // return unit at the specified position
