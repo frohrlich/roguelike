@@ -86,11 +86,10 @@ export class UISpell extends UIElement {
   }
 
   private activateSpell() {
+    this.battleScene.clearSpellRange();
     this.myScene.clearSpellsHighlight();
     this.isHighlighted = true;
-
     this.refresh();
-    this.battleScene.clearSpellRange();
     this.battleScene.displaySpellRange(this.spell);
   }
 

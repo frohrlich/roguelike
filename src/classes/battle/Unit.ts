@@ -14,6 +14,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   selectedTint = 0x777777;
   grabbedTint = 0x6666ff;
+  private readonly identifierFrame = 44;
 
   myScene: BattleScene;
   // position on the grid
@@ -41,7 +42,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   isAlly: boolean;
   healthBar!: Phaser.GameObjects.Graphics;
   // team identifier under unit's feet (blue ally, red enemy)
-  identifier!: Phaser.GameObjects.Image;
+  identifier: Phaser.GameObjects.Image;
   spells: Spell[] = [];
   timelineSlot!: UITimelineSlot;
   effectOverTime: EffectOverTime = null;
@@ -50,9 +51,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
   isSelected: boolean;
   isGrabbed = false;
 
-  private readonly blueTeamIdentifierFrame = 45;
+  private readonly allyColor = 0x0000ff;
 
-  private readonly redTeamIdentifierFrame = 44;
+  private readonly enemyColor = 0xff0000;
 
   constructor(
     scene: Phaser.Scene,
@@ -122,6 +123,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   ungrabUnit() {
     this.isGrabbed = false;
+    this.identifier.tint = this.isAlly ? this.allyColor : this.enemyColor;
     if (this.isSelected) {
       this.tint = this.selectedTint;
       this.timelineSlot.tint = this.selectedTint;
@@ -133,6 +135,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   grabUnit() {
     this.isGrabbed = true;
+    this.identifier.tint = 0xffffff;
     this.tint = this.grabbedTint;
     this.timelineSlot.tint = this.grabbedTint;
   }
@@ -303,12 +306,14 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   // these three methods are redefined by subclasses
   playTurn() {
+    this.identifier.tint = 0xffffff;
     this.undergoEffectOverTime();
   }
 
   nextAction() {}
 
   endTurn() {
+    this.identifier.tint = this.isAlly ? this.allyColor : this.enemyColor;
     this.decrementSpellCooldowns();
     this.refillPoints();
     this.myScene.endTurn();
@@ -708,16 +713,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
   /** Create team identifier (blue/red circle under unit's feet) */
   createTeamIdentifier(scale: number) {
     // identifier frame on the spritesheet (red circle or blue circle)
-    let identifierFrame = this.isAlly
-      ? this.blueTeamIdentifierFrame
-      : this.redTeamIdentifierFrame;
-    this.identifier = this.scene.add.image(
-      this.x,
-      this.y,
-      "player",
-      identifierFrame
-    );
-    this.identifier.setScale(scale);
+    const color = this.isAlly ? this.allyColor : this.enemyColor;
+    this.identifier = this.scene.add
+      .image(this.x, this.y, "player", this.identifierFrame)
+      .setTint(color)
+      .setScale(scale);
   }
 
   setBarValue(bar: Phaser.GameObjects.Graphics, percentage: number) {
