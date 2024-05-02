@@ -1,4 +1,4 @@
-import { UnitData } from "../../data/UnitData";
+import { UnitData } from "../../services/UnitService";
 import { EffectOverTime } from "./EffectOverTime";
 
 export class Spell {

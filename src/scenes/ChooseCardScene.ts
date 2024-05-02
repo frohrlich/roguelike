@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
-import { findUnitDataByType } from "../data/UnitData";
 import { DeckService } from "../services/DeckService";
+import { UnitService } from "../services/UnitService";
 
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;
@@ -195,19 +195,19 @@ export class ChooseCardScene extends Phaser.Scene {
       this,
       0,
       this.game.scale.height / 2,
-      findUnitDataByType("Amazon")
+      UnitService.units["Amazon"]
     ).setDepth(2);
     const card2 = new Card(
       this,
       card1.displayWidth * 1.5 + this.cardMargin * 2,
       this.game.scale.height / 2,
-      findUnitDataByType("Renegade")
+      UnitService.units["Renegade"]
     ).setDepth(1);
     const card3 = new Card(
       this,
       card1.displayWidth * 2.5 + this.cardMargin * 3,
       this.game.scale.height / 2,
-      findUnitDataByType("Stranger"),
+      UnitService.units["Stranger"],
       true
     );
     card1.x = card1.displayWidth / 2 + this.cardMargin;

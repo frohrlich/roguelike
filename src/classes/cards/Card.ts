@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import { UnitData } from "../../data/UnitData";
-import { decodeSpellString } from "../../data/SpellData";
+import { UnitData } from "../../services/UnitService";
 import { CardUISpell } from "./CardUISpell";
+import { SpellService } from "../../services/SpellService";
 
 export class Card extends Phaser.GameObjects.Container {
   cardWidth = 200;
@@ -98,7 +98,7 @@ export class Card extends Phaser.GameObjects.Container {
   }
 
   makeSpellIcons() {
-    const spells = decodeSpellString(this.unitData.spells);
+    const spells = SpellService.decodeSpellString(this.unitData.spells);
     for (let i = 0; i < spells.length; i++) {
       const spell = spells[i];
       this.add(

@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
-import { findUnitDataByType } from "../data/UnitData";
 import { DeckService } from "../services/DeckService";
+import { UnitService } from "../services/UnitService";
 
 export class DeckScene extends Phaser.Scene {
   marginY = 10;
@@ -81,7 +81,7 @@ export class DeckScene extends Phaser.Scene {
         this,
         0,
         0,
-        findUnitDataByType(cardName),
+        UnitService.units[cardName],
         false,
         false
       ).setScale(0.65);

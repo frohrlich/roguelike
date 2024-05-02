@@ -6,10 +6,10 @@ import { Player } from "../classes/battle/Player";
 import { Spell } from "../classes/battle/Spell";
 import { BattleUIScene } from "./BattleUIScene";
 import isVisible from "../utils/lineOfSight";
-import { UnitData, findUnitDataByType } from "../data/UnitData";
-import { decodeSpellString } from "../data/SpellData";
+import { UnitData, UnitService } from "../services/UnitService";
 import { DeckService } from "../services/DeckService";
 import { MapService } from "../services/MapService";
+import { SpellService } from "../services/SpellService";
 
 // Store a tile and the path to it
 interface TilePath {
@@ -328,7 +328,7 @@ export class BattleScene extends Phaser.Scene {
 
     // we retrieve the player characters from the deck list
     DeckService.cards.forEach((card: string) => {
-      const playerData = findUnitDataByType(card);
+      const playerData = UnitService.units[card];
       if (playerData) {
         let x: number, y: number;
         do {
@@ -347,7 +347,7 @@ export class BattleScene extends Phaser.Scene {
     });
 
     // enemy
-    const enemyData = findUnitDataByType(data.enemyType);
+    const enemyData = UnitService.units[data.enemyType];
     if (enemyData) {
       const randTile = Phaser.Math.RND.between(
         0,
@@ -614,7 +614,7 @@ export class BattleScene extends Phaser.Scene {
       this.enemies.push(unit);
     }
     // add spells
-    unit.addSpells.apply(unit, decodeSpellString(unitData.spells));
+    unit.addSpells.apply(unit, SpellService.decodeSpellString(unitData.spells));
     // unit is now considered as an obstacle for other units
     this.addToObstacleLayer(new Phaser.Math.Vector2(unit.indX, unit.indY));
     // initialize health bar
