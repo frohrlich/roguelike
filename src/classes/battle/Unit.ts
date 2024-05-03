@@ -381,11 +381,17 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   undergoSpell(spell: Spell) {
     this.hp -= spell.damage;
-    this.hp = Math.min(this.hp + spell.heal, this.maxHp);
+    this.hp += spell.heal;
     this.mp -= spell.malusMP;
     this.mp += spell.bonusMP;
     this.ap -= spell.malusAP;
     this.ap += spell.bonusAP;
+
+    this.hp = Math.max(this.hp, 0);
+    this.hp = Math.min(this.hp, this.maxHp);
+    this.mp = Math.max(this.mp, 0);
+    this.ap = Math.max(this.ap, 0);
+
     if (spell.effectOverTime) {
       this.addEffectOverTime(spell.effectOverTime);
     }
@@ -632,11 +638,12 @@ export class Unit extends Phaser.GameObjects.Sprite {
       () => {
         if (this.myScene.gameIsOver()) {
           this.myScene.gameOver();
-        }
-        if (this.myScene.battleIsFinished()) {
+        } else if (this.myScene.battleIsFinished()) {
           this.myScene.winBattle();
-        }
-        if (this.myScene.isPlayerTurn && this === this.myScene.currentPlayer) {
+        } else if (
+          this.myScene.isPlayerTurn &&
+          this === this.myScene.currentPlayer
+        ) {
           this.myScene.endTurn();
         }
         this.destroyUnit();

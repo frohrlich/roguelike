@@ -1,7 +1,6 @@
 import Phaser from "phaser";
 import { Unit } from "./Unit";
 import { Spell } from "./Spell";
-import findPath from "../../utils/findPath";
 
 // non-player characters in battle
 export class Npc extends Unit {
@@ -27,7 +26,7 @@ export class Npc extends Unit {
   }
 
   private playNpcTurn() {
-    if (!this.isDead()) {
+    if (!this.isDead() && this.canDoSomething()) {
       // first advance towards nearest foe
       if (this.mp > 0) {
         let { nearestFoe, pathToNearestFoe, distance } = this.findNearestFoe();
@@ -51,6 +50,10 @@ export class Npc extends Unit {
     } else if (!this.myScene.battleIsFinished() && !this.myScene.gameIsOver()) {
       this.waitBeforeEndTurn();
     }
+  }
+
+  private canDoSomething() {
+    return this.mp || this.isCastable(this.spells[0]);
   }
 
   private castFirstSpellOrEndTurn(nearestFoe: Unit) {
