@@ -263,6 +263,7 @@ export class UISpell extends UIElement {
 
   /** True if unit cannot currently cast this spell. */
   isInaccessible() {
+    if (!this.battleScene.currentPlayer) return null;
     return (
       this.disabled ||
       this.battleScene.currentPlayer.ap < this.spell.cost ||

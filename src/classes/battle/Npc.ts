@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { Unit } from "./Unit";
 import { Spell } from "./Spell";
+import findPath from "../../utils/findPath";
 
 // non-player characters in battle
 export class Npc extends Unit {
@@ -20,80 +21,124 @@ export class Npc extends Unit {
     super(scene, x, y, texture, frame, indX, indY, maxPm, maxPa, maxHp, isAlly);
   }
 
-  // plays npc turn
   override playTurn() {
     super.playTurn();
+    this.playNpcTurn();
+  }
+
+  private playNpcTurn() {
     if (!this.isDead()) {
-      // first try to launch spell if there is a target available
-      const spell = this.spells[0];
-      if (this.ap >= spell.cost && spell.cooldown <= 0) {
-        let target = this.locateTarget(spell);
-        if (target) {
-          let targetVec = new Phaser.Math.Vector2(target.x, target.y);
-          this.castSpell(spell, targetVec);
-          // wait till attack animation is finished
-          // also verify npc didn't kill itself during spell cast
-          // and that battle is not finished
-          if (!this.myScene.battleIsFinished() && !this.myScene.gameIsOver()) {
-            if (!this.isDead()) {
-              this.scene.time.addEvent({
-                delay: 400,
-                callback: this.tryToMove,
-                callbackScope: this,
-              });
-            } else {
-              this.scene.time.addEvent({
-                delay: 400,
-                callback: this.myScene.endTurn,
-                callbackScope: this,
-              });
-            }
+      // first advance towards nearest foe
+      if (this.mp > 0) {
+        let { nearestFoe, pathToNearestFoe, distance } = this.findNearestFoe();
+
+        if (nearestFoe) {
+          // if foe already at contact no need to move...
+          if (distance === 0) {
+            this.castFirstSpellOrEndTurn(nearestFoe);
+          } else {
+            pathToNearestFoe = pathToNearestFoe.slice(0, this.mp);
+            this.moveAlong(pathToNearestFoe);
+            this.once("endOfDeplacementReached", (unit: Unit) => {
+              if (this === unit) {
+                // then try to cast spell if there is a target available
+                this.castFirstSpellOrEndTurn(nearestFoe);
+              }
+            });
           }
-        } else {
-          this.tryToMove();
         }
-      } else {
-        this.tryToMove();
       }
     } else if (!this.myScene.battleIsFinished() && !this.myScene.gameIsOver()) {
-      this.scene.time.addEvent({
-        delay: 400,
-        callback: this.myScene.endTurn,
-        callbackScope: this,
-      });
+      this.waitBeforeEndTurn();
     }
   }
 
-  // attempts to find an accessible tile and move to it
-  tryToMove() {
-    if (this.mp > 0) {
-      const startVec = new Phaser.Math.Vector2(this.indX, this.indY);
-      // first calculate the accessible tiles around npc
-      let accessibleTiles = this.myScene.calculateAccessibleTiles(
-        startVec,
-        this.mp
+  private castFirstSpellOrEndTurn(nearestFoe: Unit) {
+    const spell = this.spells[0];
+    if (this.isCastable(spell)) {
+      this.tryToCastSpell(spell, nearestFoe);
+    } else {
+      this.endTurn();
+    }
+  }
+
+  private waitBeforeEndTurn() {
+    this.scene.time.addEvent({
+      delay: 400,
+      callback: this.endTurn,
+      callbackScope: this,
+    });
+  }
+
+  private findNearestFoe() {
+    let foes = this.isAlly ? this.myScene.enemies : this.myScene.allies;
+
+    let nearestFoe: Unit = null;
+    let distance = 9999;
+    let pathToNearestFoe = null;
+
+    foes.forEach((foe: Unit) => {
+      // first check for foes already at contact
+      if (this.myScene.getManhattanDistance(this, foe) === 1) {
+        distance = 0;
+        nearestFoe = foe;
+        pathToNearestFoe = null;
+        return { nearestFoe, pathToNearestFoe, distance };
+      }
+
+      const path = this.myScene.getPathBetweenPositions(
+        this.indX,
+        this.indY,
+        foe.indX,
+        foe.indY,
+        true
       );
-      // then chooses one randomly
-      if (accessibleTiles.length > 0) {
-        const randMove = Phaser.Math.Between(0, accessibleTiles.length - 1);
-        let path = accessibleTiles[randMove].path;
-        if (path) {
-          this.moveAlong(path);
-        } else {
-          // if no path found, do nothing
-          this.stopMovement();
-        }
-      } else {
-        // if no accessible tiles, do nothing
-        this.stopMovement();
+      if (path && path.length < distance) {
+        distance = path.length;
+        nearestFoe = foe;
+        pathToNearestFoe = path;
+      }
+    });
+    return { nearestFoe, pathToNearestFoe, distance };
+  }
+
+  private isCastable(spell: Spell) {
+    return this.ap >= spell.cost && spell.cooldown <= 0;
+  }
+
+  private tryToCastSpell(spell: Spell, targetUnit = null) {
+    let targetVec: Phaser.Math.Vector2 = null;
+    if (targetUnit && this.isUnitTargetableWithSpell(spell, targetUnit)) {
+      targetVec = new Phaser.Math.Vector2(targetUnit.indX, targetUnit.indY);
+    } else {
+      let x: number, y: number;
+      let targetTile = this.locateTarget(spell);
+      if (targetTile) {
+        ({ x, y } = this.locateTarget(spell));
+      }
+      if (x && y) {
+        targetVec = new Phaser.Math.Vector2(x, y);
+      }
+    }
+    if (targetVec) {
+      this.castSpell(spell, targetVec);
+      // wait till attack animation is finished
+      // also verify npc didn't kill itself during spell cast
+      // and that battle is not finished
+      if (!this.myScene.battleIsFinished() && !this.myScene.gameIsOver()) {
+        this.waitBeforeEndTurn();
       }
     } else {
-      this.stopMovement();
+      this.endTurn();
     }
   }
 
-  override nextAction() {
-    this.endTurn();
+  private isUnitTargetableWithSpell(spell: Spell, targetUnit: any) {
+    return this.myScene.isTileAccessibleToSpell(
+      this,
+      spell,
+      this.myScene.backgroundLayer.getTileAt(targetUnit.indX, targetUnit.indY)
+    );
   }
 
   // locates an accessible target for a given spell
@@ -103,13 +148,13 @@ export class Npc extends Unit {
         // if there is a unit there, and it's an enemy, and there is a line of sight
         // then it's a valid target
         this.myScene.isUnitThere(tile.x, tile.y) &&
-        this.isEnemy(this.myScene.getUnitAtPos(tile.x, tile.y)!) &&
+        this.isFoe(this.myScene.getUnitAtPos(tile.x, tile.y)!) &&
         this.myScene.isTileAccessibleToSpell(this, spell, tile)
     );
   }
 
   // return true if the given unit is a foe for this npc
-  isEnemy(unit: Unit) {
+  isFoe(unit: Unit) {
     return this.isAlly ? !unit.isAlly : unit.isAlly;
   }
 }

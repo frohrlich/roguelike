@@ -251,6 +251,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
         },
         onUpdate: () => {
           this.moveUnitAttributes();
+          this.depth = this.y;
         },
         duration: 300,
         repeat: 0,
@@ -283,6 +284,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.isMoving = false;
     this.refreshUI();
     this.nextAction();
+    this.emit("endOfDeplacementReached", this);
   };
 
   // convert the tile position (index) of the unit to actual pixel position
@@ -351,7 +353,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
           : Math.sign(targetVec.y - this.indY);
         unit.isMovedToNewPosition(spell.moveTargetBy, isAlignedX, isForward);
 
-        this.myScene.refreshAccessibleTiles();
+        if (this.myScene.currentPlayer) {
+          this.myScene.refreshAccessibleTiles();
+        }
         if (this.myScene.spellVisible) {
           this.myScene.displaySpellRange(this.myScene.currentSpell);
         }
@@ -616,10 +620,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
     });
     this.unselectUnit();
     this.myScene.removeUnitFromBattle(this);
-    if (this === this.myScene.currentPlayer) {
-      this.myScene.endTurn();
+
+    if (this.myScene.isPlayerTurn && this === this.myScene.currentPlayer) {
       this.myScene.clearSpellRange();
     }
+
     // turn black before dying...
     this.tint = 0x000000;
     this.scene.time.delayedCall(
@@ -630,6 +635,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
         }
         if (this.myScene.battleIsFinished()) {
           this.myScene.winBattle();
+        }
+        if (this.myScene.isPlayerTurn && this === this.myScene.currentPlayer) {
+          this.myScene.endTurn();
         }
         this.destroyUnit();
       },

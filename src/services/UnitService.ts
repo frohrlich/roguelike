@@ -13,7 +13,7 @@ export class UnitService {
   static units: { [key: string]: UnitData } = {
     Amazon: {
       HP: 100,
-      MP: 5,
+      MP: 4,
       AP: 6,
       spells: "Deadly javelin, Herbal medicine, Sting",
       frame: 8,
@@ -48,10 +48,10 @@ export class UnitService {
       description: "Snow !",
     },
     Pig: {
-      HP: 100,
+      HP: 120,
       MP: 6,
       AP: 6,
-      spells: "Deadly javelin",
+      spells: "Punch",
       frame: 0,
       type: "Pig",
       description: "Just some pig.",

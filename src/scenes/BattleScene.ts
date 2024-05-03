@@ -19,6 +19,8 @@ interface TilePath {
 
 export class BattleScene extends Phaser.Scene {
   animFramerate: number = 5;
+  enemyCount: number = 2;
+
   currentPlayer: Player;
   allies: Unit[] = [];
   enemies: Unit[] = [];
@@ -44,7 +46,7 @@ export class BattleScene extends Phaser.Scene {
   pathOverlay: Phaser.GameObjects.Rectangle[] = [];
   enemyType: string;
   grid: Phaser.GameObjects.Grid;
-  playerStarterTiles: Phaser.Tilemaps.Tile[];
+  allyStarterTiles: Phaser.Tilemaps.Tile[];
   enemyStarterTiles: Phaser.Tilemaps.Tile[];
   isInPreparationPhase: boolean;
 
@@ -147,7 +149,7 @@ export class BattleScene extends Phaser.Scene {
     const playerColor = 0x0000ff;
     const enemyColor = 0xff0000;
 
-    this.playerStarterTiles.forEach((tile) => {
+    this.allyStarterTiles.forEach((tile) => {
       // overlay the tiles with an interactive transparent rectangle
       let overlay = this.add.rectangle(
         tile.pixelX + 0.5 * tile.width,
@@ -214,7 +216,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private calculatePlayerStarterTiles() {
-    this.playerStarterTiles = this.backgroundLayer.filterTiles(
+    this.allyStarterTiles = this.backgroundLayer.filterTiles(
       (tile: Phaser.Tilemaps.Tile) => this.isWalkable(tile.x, tile.y),
       this,
       0,
@@ -280,7 +282,7 @@ export class BattleScene extends Phaser.Scene {
     this.clearPointerEvents();
     this.clearOverlay();
     this.enemyStarterTiles = [];
-    this.playerStarterTiles = [];
+    this.allyStarterTiles = [];
     this.displayBattleStartScreen();
     this.addSpellUnselectListener();
     this.highlightCurrentUnitInTimeline();
@@ -314,9 +316,9 @@ export class BattleScene extends Phaser.Scene {
     }
 
     const currentUnit = this.timeline[this.timelineIndex];
+
     this.highlightCurrentUnitInTimeline();
     currentUnit.playTurn();
-
     if (currentUnit instanceof Player) {
       this.startPlayerTurn(currentUnit);
     }
@@ -329,34 +331,34 @@ export class BattleScene extends Phaser.Scene {
     // we retrieve the player characters from the deck list
     DeckService.cards.forEach((card: string) => {
       const playerData = UnitService.units[card];
-      if (playerData) {
-        let x: number, y: number;
-        do {
-          const randTile = Phaser.Math.RND.between(
-            0,
-            this.playerStarterTiles.length - 1
-          );
-          const tile = this.playerStarterTiles[randTile];
-          x = tile.x;
-          y = tile.y;
-        } while (this.isAllyThere(x, y));
-        this.addUnit(playerData, x, y, false, true);
-      } else {
-        throw new Error("Error : unit not found");
-      }
+
+      let x: number, y: number;
+      do {
+        const randTile = Phaser.Math.RND.between(
+          0,
+          this.allyStarterTiles.length - 1
+        );
+        const tile = this.allyStarterTiles[randTile];
+        x = tile.x;
+        y = tile.y;
+      } while (this.isAllyThere(x, y));
+      this.addUnit(playerData, x, y, false, true);
     });
 
     // enemy
-    const enemyData = UnitService.units[data.enemyType];
-    if (enemyData) {
-      const randTile = Phaser.Math.RND.between(
-        0,
-        this.enemyStarterTiles.length - 1
-      );
-      const { x, y } = this.enemyStarterTiles[randTile];
+    for (let i = 0; i < this.enemyCount; i++) {
+      const enemyData = UnitService.units[data.enemyType];
+      let x: number, y: number;
+      do {
+        const randTile = Phaser.Math.RND.between(
+          0,
+          this.enemyStarterTiles.length - 1
+        );
+        const tile = this.enemyStarterTiles[randTile];
+        x = tile.x;
+        y = tile.y;
+      } while (this.isEnemyThere(x, y));
       this.addUnit(enemyData, x, y, true, false);
-    } else {
-      throw new Error("Error : unit not found");
     }
   }
 
@@ -421,18 +423,40 @@ export class BattleScene extends Phaser.Scene {
   }
 
   /** Checks if the unit can access this tile with their remaining MPs.
-   *  If there is a path, return it.
+   *  If there is a path, return it. Else return null.
    */
-  getPathToPosition(
-    x: number,
-    y: number,
+  getPathToPositionWithRemainingMps(
     unitX: number,
     unitY: number,
+    x: number,
+    y: number,
     pm: number
   ) {
-    const startVec = new Phaser.Math.Vector2(unitX, unitY);
-    const targetVec = new Phaser.Math.Vector2(x, y);
+    const path = this.getPathBetweenPositions(unitX, unitY, x, y);
+    if (path && path.length <= pm) {
+      return path;
+    } else {
+      return null;
+    }
+  }
 
+  /** Returns the shortest path between two positions if it exists, or null if it doesn't. */
+  getPathBetweenPositions(
+    startX: number,
+    startY: number,
+    targetX: number,
+    targetY: number,
+    pathToUnitContact: boolean = false
+  ) {
+    const startVec = new Phaser.Math.Vector2(startX, startY);
+    const targetVec = new Phaser.Math.Vector2(targetX, targetY);
+
+    if (pathToUnitContact) {
+      const targetUnit = this.getUnitAtPos(targetVec.x, targetVec.y);
+      if (targetUnit) {
+        this.removeFromObstacleLayer(targetUnit);
+      }
+    }
     const path = findPath(
       startVec,
       targetVec,
@@ -440,10 +464,15 @@ export class BattleScene extends Phaser.Scene {
       this.obstaclesLayer,
       this.transparentObstaclesLayer
     );
-    if (path && path.length > 0 && path.length <= pm) {
+    if (pathToUnitContact) {
+      if (path) path.pop();
+      this.addToObstacleLayer(targetVec);
+    }
+
+    if (path && path.length > 0) {
       return path;
     } else {
-      return false;
+      return null;
     }
   }
 
@@ -527,7 +556,13 @@ export class BattleScene extends Phaser.Scene {
         const distance = Math.abs(tile.x - pos.x) + Math.abs(tile.y - pos.y);
         let path;
         if (!isPlayerTile && pm >= distance) {
-          path = this.getPathToPosition(tile.x, tile.y, x, y, pm);
+          path = this.getPathToPositionWithRemainingMps(
+            x,
+            y,
+            tile.x,
+            tile.y,
+            pm
+          );
         }
         if (path) {
           let myPos: TilePath = {
@@ -739,7 +774,7 @@ export class BattleScene extends Phaser.Scene {
 
   removeUnitFromTeam(unit: Unit) {
     const teamArray = unit.isAlly ? this.allies : this.enemies;
-    const index = teamArray.findIndex((unit) => unit == unit);
+    const index = teamArray.findIndex((unitToDelete) => unitToDelete === unit);
     if (index !== -1) {
       teamArray.splice(index, 1);
     }
@@ -1060,6 +1095,10 @@ export class BattleScene extends Phaser.Scene {
     return this.allies.some((unit) => unit.indX == x && unit.indY == y);
   }
 
+  isEnemyThere(x: number, y: number): boolean {
+    return this.enemies.some((unit) => unit.indX == x && unit.indY == y);
+  }
+
   // return unit at the specified position
   getUnitAtPos(x: number, y: number) {
     return this.timeline.find((unit) => unit.indX == x && unit.indY == y);
@@ -1069,6 +1108,7 @@ export class BattleScene extends Phaser.Scene {
     const index = this.timeline.findIndex(
       (timelineUnit) => timelineUnit == unit
     );
+
     if (index !== -1) {
       this.timeline.splice(index, 1);
       if (index <= this.timelineIndex) this.timelineIndex--;
@@ -1158,6 +1198,12 @@ export class BattleScene extends Phaser.Scene {
 
   isThereAGrabbedUnitAlready() {
     return this.timeline.some((unit) => unit.isGrabbed);
+  }
+
+  getManhattanDistance(unitA: Unit, unitB: Unit) {
+    return (
+      Math.abs(unitA.indX - unitB.indX) + Math.abs(unitA.indY - unitB.indY)
+    );
   }
 }
 
