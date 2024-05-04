@@ -6,6 +6,7 @@ import { UnitService } from "./UnitService";
 export class SpellService {
   static effectsOverTime: { [key: string]: EffectOverTime } = {
     Poison: new EffectOverTime("Poison", 58, 2, 10, 1, 1, 0, 0, 0),
+    "Wasp venom": new EffectOverTime("Wasp venom", 58, 2, 10, 1, 1, 0, 0, 0),
     Plague: new EffectOverTime("Plague", 59, 2, 25, 2, 2, 0, 0, 0),
   };
 
@@ -186,6 +187,41 @@ export class SpellService {
       0,
       null,
       UnitService.units["Princess"]
+    ),
+    Biting: new Spell(
+      0,
+      1,
+      1,
+      4,
+      "Biting",
+      true,
+      false,
+      30,
+      0,
+      0,
+      0,
+      0,
+      0,
+      "monoTarget"
+    ),
+    "Wasp sting": new Spell(
+      0,
+      1,
+      1,
+      4,
+      "Wasp sting",
+      true,
+      false,
+      15,
+      0,
+      0,
+      0,
+      0,
+      0,
+      "monoTarget",
+      1,
+      0,
+      this.effectsOverTime["Wasp venom"]
     ),
   };
 

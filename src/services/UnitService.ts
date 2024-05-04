@@ -49,12 +49,21 @@ export class UnitService {
     },
     Pig: {
       HP: 120,
-      MP: 6,
+      MP: 5,
       AP: 6,
-      spells: "Punch",
+      spells: "Biting",
       frame: 0,
       type: "Pig",
       description: "Just some pig.",
+    },
+    Wasp: {
+      HP: 80,
+      MP: 8,
+      AP: 6,
+      spells: "Wasp sting",
+      frame: 4,
+      type: "Wasp",
+      description: "A really big wasp.",
     },
     Princess: {
       HP: 50,
