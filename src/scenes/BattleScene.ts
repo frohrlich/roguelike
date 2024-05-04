@@ -372,10 +372,13 @@ export class BattleScene extends Phaser.Scene {
   }
 
   private createTilemap() {
+    const mapName = MapService.getCurrentZoneName();
     // choose map randomly among a set
     const mapCount = 3;
     const randomMapIndex = Phaser.Math.RND.between(1, mapCount);
-    this.map = this.make.tilemap({ key: `forest_battlemap${randomMapIndex}` });
+    this.map = this.make.tilemap({
+      key: `${mapName}_battlemap${randomMapIndex}`,
+    });
     this.tileWidth = this.map.tileWidth;
     this.tileHeight = this.map.tileHeight;
 
@@ -1212,11 +1215,11 @@ let createTimeline = (allies: Unit[], enemies: Unit[]) => {
   const maxSize = Math.max(allies.length, enemies.length);
   let timeline: Unit[] = [];
   for (let i = 0; i < maxSize; i++) {
-    if (enemies.length > i) {
-      timeline.push(enemies[i]);
-    }
     if (allies.length > i) {
       timeline.push(allies[i]);
+    }
+    if (enemies.length > i) {
+      timeline.push(enemies[i]);
     }
   }
   return timeline;

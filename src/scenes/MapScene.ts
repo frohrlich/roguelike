@@ -32,12 +32,15 @@ export class MapScene extends Phaser.Scene {
 
   initializeLocationNames() {
     for (let i = 0; i < this.locationCount; i++) {
-      this.locationNames.push(MapService.getRandomForestName());
+      this.locationNames.push(MapService.getRandomPlaceName());
     }
   }
 
   createBackground() {
-    this.add.image(0, 0, "forest_background").setOrigin(0, 0).setTint(0x555555);
+    this.add
+      .image(0, 0, `${MapService.getCurrentZoneName()}_background`)
+      .setOrigin(0, 0)
+      .setTint(0x555555);
   }
 
   createStartButton() {
@@ -130,7 +133,7 @@ export class MapScene extends Phaser.Scene {
         this.game.scale.width / 2,
         this.game.scale.height - bottomMargin,
         "dogicapixel",
-        "Your journey begins in a beautiful forest...",
+        MapService.getCurrentZoneDescription(),
         fontSize
       )
       .setOrigin(0.5, 1);

@@ -44,6 +44,8 @@ export class BootScene extends Phaser.Scene {
     this.load.image("tiles", "public/assets/map/spritesheet.png");
 
     // maps in json format
+
+    // forest
     this.load.tilemapTiledJSON(
       "forest_battlemap1",
       "public/assets/map/forest_battlemap1.json"
@@ -55,6 +57,19 @@ export class BootScene extends Phaser.Scene {
     this.load.tilemapTiledJSON(
       "forest_battlemap3",
       "public/assets/map/forest_battlemap3.json"
+    );
+    // corrupt forest
+    this.load.tilemapTiledJSON(
+      "corrupt_forest_battlemap1",
+      "public/assets/map/corrupt_forest_battlemap1.json"
+    );
+    this.load.tilemapTiledJSON(
+      "corrupt_forest_battlemap2",
+      "public/assets/map/corrupt_forest_battlemap2.json"
+    );
+    this.load.tilemapTiledJSON(
+      "corrupt_forest_battlemap3",
+      "public/assets/map/corrupt_forest_battlemap3.json"
     );
 
     // characters and 16x16 icons
@@ -71,6 +86,10 @@ export class BootScene extends Phaser.Scene {
     this.load.image(
       "forest_background",
       "public/assets/images/forest_background.png"
+    );
+    this.load.image(
+      "corrupt_forest_background",
+      "public/assets/images/corrupt_forest_background.png"
     );
 
     // fonts
