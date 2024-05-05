@@ -129,36 +129,15 @@ export class SpellService {
     ),
     Punch: new Spell(68, 1, 1, 4, "Punch", true, false, 50),
     // DEV
-    Sting: new Spell(
-      80,
-      0,
-      30,
-      0,
-      "Sting",
-      false,
-      false,
-      100,
-      0,
-      1,
-      0,
-      0,
-      0,
-      "monoTarget",
-      0,
-      0,
-      null
-    ),
-    // PROD
-    // Sting:
-    //new Spell(
+    // Sting: new Spell(
     //   80,
     //   0,
-    //   12,
-    //   2,
+    //   30,
+    //   0,
     //   "Sting",
-    //   true,
     //   false,
-    //   15,
+    //   false,
+    //   100,
     //   0,
     //   1,
     //   0,
@@ -166,13 +145,55 @@ export class SpellService {
     //   0,
     //   "monoTarget",
     //   0,
-    //   1
+    //   0,
+    //   null
     // ),
+    // PROD
+    Sting: new Spell(
+      80,
+      0,
+      12,
+      2,
+      "Sting",
+      true,
+      false,
+      15,
+      0,
+      1,
+      0,
+      0,
+      0,
+      "monoTarget",
+      0,
+      1
+    ),
+    // DEV
+    // "Herbal medicine": new Spell(
+    //   92,
+    //   0,
+    //   4,
+    //   0,
+    //   "Herbal medicine",
+    //   true,
+    //   false,
+    //   0,
+    //   0,
+    //   0,
+    //   20,
+    //   1,
+    //   1,
+    //   "star",
+    //   2,
+    //   0,
+    //   null,
+    //   UnitService.units["Princess"]
+    // ),
+    // PROD
     "Herbal medicine": new Spell(
       92,
       0,
       4,
-      0,
+      4,
       "Herbal medicine",
       true,
       false,
@@ -184,9 +205,7 @@ export class SpellService {
       1,
       "star",
       2,
-      0,
-      null,
-      UnitService.units["Princess"]
+      2
     ),
     Biting: new Spell(
       0,

@@ -349,7 +349,7 @@ export class BattleScene extends Phaser.Scene {
         const tile = this.allyStarterTiles[randTile];
         x = tile.x;
         y = tile.y;
-      } while (this.isAllyThere(x, y));
+      } while (y < 2 || this.isAllyThere(x, y));
       this.addUnit(playerData, x, y, false, true);
     });
 
