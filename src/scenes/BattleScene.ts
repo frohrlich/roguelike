@@ -18,9 +18,11 @@ interface TilePath {
 }
 
 export class BattleScene extends Phaser.Scene {
-  animFramerate: number = 5;
-  enemyCount: number = 2;
+  animFramerate = 5;
+  enemyCount = 2; // enemies per battle
+  static mapsCount = 3; // different battle maps per zone
 
+  static mapNumbers: number[] = [];
   currentPlayer: Player;
   allies: Unit[] = [];
   enemies: Unit[] = [];
@@ -56,9 +58,15 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
-  preload(): void {}
+  static refreshBattleMapsNumbers() {
+    // array containing the number of the battle scenes ([1,2,3] typically)
+    for (let i = 1; i <= this.mapsCount; i++) {
+      this.mapNumbers.push(i);
+    }
+  }
 
   create(data: any): void {
+    console.log(BattleScene.mapNumbers);
     // refresh scene to its original state
     this.timelineIndex = 0;
     this.isPlayerTurn = false;
@@ -374,16 +382,30 @@ export class BattleScene extends Phaser.Scene {
   private createTilemap() {
     const mapName = MapService.getCurrentZoneName();
     // choose map randomly among a set
-    const mapCount = 3;
-    const randomMapIndex = Phaser.Math.RND.between(1, mapCount);
+    const randomMapIndex = Phaser.Math.RND.between(
+      0,
+      BattleScene.mapNumbers.length - 1
+    );
+
     this.map = this.make.tilemap({
-      key: `${mapName}_battlemap${randomMapIndex}`,
+      key: `${mapName}_battlemap${BattleScene.mapNumbers[randomMapIndex]}`,
     });
+    // then remove map from current battle maps so we don't get the same one twice
+    BattleScene.mapNumbers.splice(randomMapIndex, 1);
+
     this.tileWidth = this.map.tileWidth;
     this.tileHeight = this.map.tileHeight;
 
     // get the tileset
-    this.tileset = this.map.addTilesetImage("forest_tilemap", "tiles");
+    let tilesetName = MapService.getCurrentZoneName();
+    // the forest tileset is common to forest and corrupt_forest zones
+    if (tilesetName.includes("forest")) {
+      tilesetName = "forest";
+    }
+    this.tileset = this.map.addTilesetImage(
+      `${tilesetName}_tilemap`,
+      `${tilesetName}_tiles`
+    );
 
     // create layers
     this.backgroundLayer = this.map.createLayer(

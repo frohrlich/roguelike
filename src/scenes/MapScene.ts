@@ -69,7 +69,7 @@ export class MapScene extends Phaser.Scene {
       .setInteractive()
       .on("pointerup", () => {
         this.scene.start("BattleScene", {
-          enemyType: "Wasp",
+          enemyType: MapService.getCurrentEnemy(),
         });
       });
   }

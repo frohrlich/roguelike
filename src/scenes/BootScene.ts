@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { GAME_WIDTH, GAME_HEIGHT } from "../app";
+import { BattleScene } from "./BattleScene";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -41,7 +42,11 @@ export class BootScene extends Phaser.Scene {
     });
 
     // map tiles
-    this.load.image("tiles", "public/assets/map/spritesheet.png");
+    this.load.image("forest_tiles", "public/assets/map/forest_spritesheet.png");
+    this.load.image(
+      "dungeon_tiles",
+      "public/assets/map/dungeon_spritesheet.png"
+    );
 
     // maps in json format
 
@@ -71,6 +76,19 @@ export class BootScene extends Phaser.Scene {
       "corrupt_forest_battlemap3",
       "public/assets/map/corrupt_forest_battlemap3.json"
     );
+    // dungeon
+    this.load.tilemapTiledJSON(
+      "dungeon_battlemap1",
+      "public/assets/map/dungeon_battlemap1.json"
+    );
+    this.load.tilemapTiledJSON(
+      "dungeon_battlemap2",
+      "public/assets/map/dungeon_battlemap2.json"
+    );
+    this.load.tilemapTiledJSON(
+      "dungeon_battlemap3",
+      "public/assets/map/dungeon_battlemap3.json"
+    );
 
     // characters and 16x16 icons
     this.load.spritesheet("player", "public/assets/images/RPG_assets.png", {
@@ -79,7 +97,6 @@ export class BootScene extends Phaser.Scene {
     });
 
     // illustrations
-    this.load.image("princess", "public/assets/images/princess.png");
     this.load.image("AmazonIllus", "public/assets/images/amazon.png");
     this.load.image("RenegadeIllus", "public/assets/images/renegade.png");
     this.load.image("StrangerIllus", "public/assets/images/stranger.png");
@@ -90,6 +107,10 @@ export class BootScene extends Phaser.Scene {
     this.load.image(
       "corrupt_forest_background",
       "public/assets/images/corrupt_forest_background.png"
+    );
+    this.load.image(
+      "dungeon_background",
+      "public/assets/images/dungeon_background.png"
     );
 
     // fonts
@@ -106,6 +127,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    BattleScene.refreshBattleMapsNumbers();
     this.scene.start("ChooseCardScene", { isStarting: true });
   }
 }

@@ -39,10 +39,10 @@ export class UnitService {
       description: "...",
     },
     Snowman: {
-      HP: 100,
+      HP: 150,
       MP: 6,
       AP: 6,
-      spells: "Sting",
+      spells: "Biting",
       frame: 40,
       type: "Snowman",
       description: "Snow !",

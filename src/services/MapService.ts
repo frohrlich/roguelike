@@ -1,15 +1,20 @@
+import { BattleScene } from "../scenes/BattleScene";
+
 export class MapService {
   private static readonly zoneSize = 3;
-  private static readonly zoneCount = 2;
+  private static readonly zoneCount = 3;
 
   static position = 0;
   static zone = 0;
 
-  static zoneNames = ["forest", "corrupt_forest"];
+  static zoneNames = ["forest", "corrupt_forest", "dungeon"];
+
+  static enemyTypes = ["Pig", "Wasp", "Snowman"];
 
   static zoneDescriptions = [
     "Your journey begins in a beautiful forest...",
     "There's something wrong with this place.",
+    "You've reached the source of all evil.",
   ];
 
   static places_adjectives = [
@@ -41,7 +46,22 @@ export class MapService {
       "Sick",
       "Wild",
     ],
+    [
+      "Dark",
+      "Sinister",
+      "Somber",
+      "Black",
+      "Starless",
+      "Terrible",
+      "Dreadful",
+      "Ghastly",
+      "Dire",
+      "Gloomy",
+      "Tenebrous",
+      "Cold",
+    ],
   ];
+  static currentAdjectives: string[] = this.places_adjectives[0];
 
   static places_nouns = [
     [
@@ -72,27 +92,51 @@ export class MapService {
       "Moor",
       "Marsh",
     ],
+    [
+      "Dungeon",
+      "Cell",
+      "Oubliette",
+      "Hole",
+      "Keep",
+      "Castle",
+      "Prison",
+      "Citadel",
+      "Lair",
+      "Hideout",
+      "Den",
+      "Fortress",
+    ],
   ];
+  static currentNouns: string[] = this.places_nouns[0];
 
   static getRandomPlaceName = () => {
-    return (
-      this.places_adjectives[this.zone][
-        Phaser.Math.Between(0, this.places_adjectives[this.zone].length - 1)
-      ] +
-      " " +
-      MapService.places_nouns[this.zone][
-        Phaser.Math.Between(0, this.places_nouns[this.zone].length - 1)
-      ]
-    );
+    let randIndex = Phaser.Math.Between(0, this.currentAdjectives.length - 1);
+    const randAdjective = this.currentAdjectives[randIndex];
+    // we don't want to use the same adjective twice so remove it from list
+    this.currentAdjectives.splice(randIndex, 1);
+
+    // same for nouns
+    randIndex = Phaser.Math.Between(0, this.currentNouns.length - 1);
+    const randNoun = this.currentNouns[randIndex];
+    this.currentNouns.splice(randIndex, 1);
+
+    return randAdjective + " " + randNoun;
   };
 
   static incrementPosition() {
     this.position++;
+    // reached end of zone, go to next zone
     if (this.position >= MapService.zoneSize) {
       this.position = 0;
       this.zone++;
+      this.currentAdjectives = this.places_adjectives[this.zone];
+      this.currentNouns = this.places_nouns[this.zone];
+      BattleScene.refreshBattleMapsNumbers();
+      // reached end of last zone, go back to beginning
       if (this.zone >= this.zoneCount) {
         this.zone = 0;
+        this.currentAdjectives = this.places_adjectives[0];
+        this.currentNouns = this.places_nouns[0];
       }
     }
   }
@@ -103,5 +147,9 @@ export class MapService {
 
   static getCurrentZoneDescription() {
     return this.zoneDescriptions[this.zone];
+  }
+
+  static getCurrentEnemy() {
+    return this.enemyTypes[this.zone];
   }
 }
