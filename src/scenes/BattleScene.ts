@@ -56,6 +56,7 @@ export class BattleScene extends Phaser.Scene {
     super({
       key: "BattleScene",
     });
+    BattleScene.refreshBattleMapsNumbers();
   }
 
   static refreshBattleMapsNumbers() {
@@ -66,7 +67,6 @@ export class BattleScene extends Phaser.Scene {
   }
 
   create(data: any): void {
-    console.log(BattleScene.mapNumbers);
     // refresh scene to its original state
     this.timelineIndex = 0;
     this.isPlayerTurn = false;
@@ -1182,17 +1182,23 @@ export class BattleScene extends Phaser.Scene {
   gameOver() {
     this.resetScene();
     this.resetGameState();
-    this.scene.start("BootScene");
+    this.scene.start("EndScene", { isWin: false });
   }
 
   winBattle() {
     this.resetScene();
     MapService.incrementPosition();
-    this.scene.start("ChooseCardScene", { isStarting: false });
+    // if you reached the end of the last zone, you win !
+    if (MapService.zone >= MapService.zoneCount) {
+      this.resetGameState();
+      this.scene.start("EndScene", { isWin: true });
+    } else {
+      this.scene.start("ChooseCardScene", { isStarting: false });
+    }
   }
 
   private resetGameState() {
-    MapService.position = 0;
+    MapService.resetMap();
     DeckService.cards = [];
   }
 

@@ -2,7 +2,7 @@ import "phaser";
 import { BootScene } from "./scenes/BootScene";
 import { BattleScene } from "./scenes/BattleScene";
 import { BattleUIScene } from "./scenes/BattleUIScene";
-import { GameOverScene } from "./scenes/GameOverScene";
+import { EndScene } from "./scenes/EndScene";
 import { ChooseCardScene } from "./scenes/ChooseCardScene";
 import { MapScene } from "./scenes/MapScene";
 import screenfull from "screenfull";
@@ -36,7 +36,7 @@ const config = {
     DeckScene,
     BattleScene,
     BattleUIScene,
-    GameOverScene,
+    EndScene,
   ],
 };
 export class RpgGame extends Phaser.Game {

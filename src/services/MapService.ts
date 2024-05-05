@@ -1,8 +1,8 @@
 import { BattleScene } from "../scenes/BattleScene";
 
 export class MapService {
-  private static readonly zoneSize = 3;
-  private static readonly zoneCount = 3;
+  static readonly zoneSize = 3;
+  static readonly zoneCount = 3;
 
   static position = 0;
   static zone = 0;
@@ -132,13 +132,14 @@ export class MapService {
       this.currentAdjectives = this.places_adjectives[this.zone];
       this.currentNouns = this.places_nouns[this.zone];
       BattleScene.refreshBattleMapsNumbers();
-      // reached end of last zone, go back to beginning
-      if (this.zone >= this.zoneCount) {
-        this.zone = 0;
-        this.currentAdjectives = this.places_adjectives[0];
-        this.currentNouns = this.places_nouns[0];
-      }
     }
+  }
+
+  static resetMap() {
+    this.position = 0;
+    this.zone = 0;
+    this.currentAdjectives = this.places_adjectives[0];
+    this.currentNouns = this.places_nouns[0];
   }
 
   static getCurrentZoneName() {

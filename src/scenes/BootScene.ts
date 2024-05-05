@@ -112,6 +112,11 @@ export class BootScene extends Phaser.Scene {
       "dungeon_background",
       "public/assets/images/dungeon_background.png"
     );
+    this.load.image("win_image", "public/assets/images/win_image.png");
+    this.load.image(
+      "gameover_image",
+      "public/assets/images/gameover_image.png"
+    );
 
     // fonts
     this.load.bitmapFont(
@@ -127,7 +132,6 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    BattleScene.refreshBattleMapsNumbers();
     this.scene.start("ChooseCardScene", { isStarting: true });
   }
 }
