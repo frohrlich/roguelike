@@ -1193,7 +1193,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   winBattle() {
-    const delay = 1500;
+    const delay = 1200;
     this.displayWholeScreenMessage("Victory !", delay);
     this.time.addEvent({
       delay: delay,

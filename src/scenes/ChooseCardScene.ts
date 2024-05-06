@@ -8,6 +8,11 @@ export class ChooseCardScene extends Phaser.Scene {
 
   currentCardChoice: string;
   isStarting: boolean;
+  cards: Card[];
+  chooseText: Phaser.GameObjects.BitmapText;
+  chooseButton: Phaser.GameObjects.Rectangle;
+  characterDescription: Phaser.GameObjects.BitmapText;
+  unselectCardOverlay: Phaser.GameObjects.Rectangle;
 
   constructor() {
     super({
@@ -16,49 +21,40 @@ export class ChooseCardScene extends Phaser.Scene {
   }
 
   create(data: any) {
+    this.cards = [];
+    this.unselectCardOverlay = null;
     this.isStarting = data.isStarting;
     if (!this.isStarting) {
       this.addDeckButton();
     }
-    const { card1, card2, card3 } = this.addCards();
-    const { chooseText, chooseButton, chooseTextX } =
-      this.addChooseCardButton(card1);
-    const characterDescription = this.addCharacterDescription(card1);
-    this.addCardEvents(
-      card1,
-      card2,
-      card3,
-      chooseText,
-      chooseButton,
-      characterDescription
-    );
-    this.addLegend(chooseTextX);
+    this.addCards();
+    this.addChooseCardButton();
+    this.addCharacterDescription();
+    this.addCardEvents();
+    this.addLegend();
     this.addInfoTip();
   }
 
-  toggleCardsVisibility = (...cards: Card[]) => {
+  toggleCardsVisibility = (cards: Card[]) => {
     cards.forEach((card) => {
       card.setVisible(!card.visible);
     });
   };
 
-  toggleChooseFighter = (
-    chooseText: Phaser.GameObjects.BitmapText,
-    chooseButton: Phaser.GameObjects.Rectangle,
-    type: string
-  ) => {
+  toggleChooseFighter = (type: string) => {
     const defaultText = this.isStarting
       ? "Choose your \nstarting\ncard !"
       : "Choose a\ncard !";
-    if (chooseText.text === defaultText) {
-      chooseText.text = `Choose\n${type} ?`;
-      chooseText.tint = 0x00ff00;
-      chooseButton.setVisible(true);
-      chooseButton.displayWidth = chooseText.displayWidth + 5;
+    if (this.chooseText.text === defaultText) {
+      this.chooseText.text = `Choose\n${type} ?`;
+      this.chooseText.tint = 0x00ff00;
+      this.chooseButton.setVisible(true);
+      this.chooseButton.displayWidth = this.chooseText.displayWidth + 5;
+      this.chooseButton.displayHeight = this.chooseText.displayHeight + 5;
     } else {
-      chooseText.text = defaultText;
-      chooseText.tint = 0xffffff;
-      chooseButton.setVisible(false);
+      this.chooseText.text = defaultText;
+      this.chooseText.tint = 0xffffff;
+      this.chooseButton.setVisible(false);
     }
   };
 
@@ -72,11 +68,11 @@ export class ChooseCardScene extends Phaser.Scene {
     );
   }
 
-  private addLegend(chooseTextX: number) {
+  private addLegend() {
     const legendTopMargin = 10;
     // MP
     const MPLegend = this.add.bitmapText(
-      chooseTextX,
+      this.chooseText.x,
       legendTopMargin,
       "dogicapixel",
       "Movement points",
@@ -85,7 +81,7 @@ export class ChooseCardScene extends Phaser.Scene {
     // HP
     const HPLegend = this.add
       .bitmapText(
-        chooseTextX,
+        this.chooseText.x,
         MPLegend.getBottomLeft().y,
         "dogicapixel",
         "Health points",
@@ -93,9 +89,9 @@ export class ChooseCardScene extends Phaser.Scene {
       )
       .setTint(0xff0000);
     // AP
-    const APLegend = this.add
+    this.add
       .bitmapText(
-        chooseTextX,
+        this.chooseText.x,
         HPLegend.getBottomLeft().y,
         "dogicapixel",
         "Action points",
@@ -104,62 +100,62 @@ export class ChooseCardScene extends Phaser.Scene {
       .setTint(0x33c6f7);
   }
 
-  private addCardEvents(
-    card1: Card,
-    card2: Card,
-    card3: Card,
-    chooseText: Phaser.GameObjects.BitmapText,
-    chooseButton: Phaser.GameObjects.Rectangle,
-    characterDescription: Phaser.GameObjects.BitmapText
-  ) {
-    card1.on("pointerup", () => {
-      this.toggleCardsVisibility(card2, card3);
-      this.toggleChooseFighter(chooseText, chooseButton, card1.unitData.type);
-      this.currentCardChoice = card1.unitData.type;
-      if (characterDescription.text === card1.unitData.description) {
-        characterDescription.text = "";
-      } else {
-        characterDescription.text = card1.unitData.description;
-      }
-    });
-    card2.on("pointerup", () => {
-      this.toggleCardsVisibility(card1, card3);
-      this.toggleChooseFighter(chooseText, chooseButton, card2.unitData.type);
-      this.currentCardChoice = card2.unitData.type;
-      if (characterDescription.text === card2.unitData.description) {
-        characterDescription.text = "";
-      } else {
-        characterDescription.text = card2.unitData.description;
-      }
-    });
-    card3.on("pointerup", () => {
-      this.toggleCardsVisibility(card1, card2);
-      this.toggleChooseFighter(chooseText, chooseButton, card3.unitData.type);
-      this.currentCardChoice = card3.unitData.type;
-      if (characterDescription.text === card3.unitData.description) {
-        characterDescription.text = "";
-      } else {
-        characterDescription.text = card3.unitData.description;
-      }
+  private addCardEvents() {
+    this.cards.forEach((card: Card) => {
+      card.on("pointerup", () => {
+        this.toggleCardSelect(card);
+      });
     });
   }
 
-  private addCharacterDescription(card1: Card) {
-    return this.add.bitmapText(
+  private toggleCardSelect(card: Card) {
+    const cardIndex = this.cards.findIndex((findCard) => findCard === card);
+    const otherCards = arrayWithoutElementAtIndex(this.cards, cardIndex);
+    this.toggleCardsVisibility(otherCards);
+    this.toggleChooseFighter(card.unitData.type);
+    this.currentCardChoice = card.unitData.type;
+    this.toggleUnselectCardOverlay(card);
+    if (this.characterDescription.text === card.unitData.description) {
+      this.characterDescription.text = "";
+    } else {
+      this.characterDescription.text = card.unitData.description;
+    }
+  }
+
+  private toggleUnselectCardOverlay(card: Card) {
+    if (!this.unselectCardOverlay) {
+      this.unselectCardOverlay = this.add
+        .rectangle(0, 0, this.game.scale.width, this.game.scale.height, 0, 0)
+        .setInteractive()
+        .setOrigin(0)
+        .setDepth(1)
+        .once("pointerup", () => {
+          this.toggleCardSelect(card);
+          card.toggleCardView();
+        });
+    } else {
+      this.unselectCardOverlay.destroy();
+      this.unselectCardOverlay = null;
+    }
+  }
+
+  private addCharacterDescription() {
+    this.characterDescription = this.add.bitmapText(
       10,
-      card1.getBounds().bottom + 20,
+      this.cards[0].getBounds().bottom + 20,
       "dogicapixel",
       "",
       16
     );
   }
 
-  private addChooseCardButton(card1: Card) {
+  private addChooseCardButton() {
     const buttonText = this.isStarting
       ? "Choose your \nstarting\ncard !"
       : "Choose a\ncard !";
-    const chooseTextX = card1.displayWidth * 3 + this.cardMargin * 3 + 14;
-    const chooseText = this.add
+    const chooseTextX =
+      this.cards[0].displayWidth * 3 + this.cardMargin * 3 + 14;
+    this.chooseText = this.add
       .bitmapText(
         chooseTextX,
         this.game.scale.height / 2,
@@ -167,19 +163,19 @@ export class ChooseCardScene extends Phaser.Scene {
         buttonText,
         24
       )
-      .setDepth(-1)
+      .setDepth(3)
       .setOrigin(0, 0.5);
     const buttonMargin = 3;
-    const chooseButton = this.add
+    this.chooseButton = this.add
       .rectangle(
-        chooseText.x - buttonMargin,
-        chooseText.y - buttonMargin / 2,
-        chooseText.displayWidth - 6,
-        chooseText.displayHeight + buttonMargin * 2,
+        this.chooseText.x - buttonMargin,
+        this.chooseText.y - buttonMargin / 2,
+        this.chooseText.displayWidth - 6,
+        this.chooseText.displayHeight + buttonMargin * 2,
         0x003700
       )
       .setStrokeStyle(2, 0xffffff)
-      .setDepth(-2)
+      .setDepth(2)
       .setOrigin(0, 0.5)
       .setVisible(false)
       .setInteractive()
@@ -187,7 +183,6 @@ export class ChooseCardScene extends Phaser.Scene {
         DeckService.addCard(this.currentCardChoice);
         this.scene.start("MapScene");
       });
-    return { chooseText, chooseButton, chooseTextX };
   }
 
   private addCards() {
@@ -197,6 +192,7 @@ export class ChooseCardScene extends Phaser.Scene {
       this.game.scale.height / 2,
       UnitService.units["Amazon"]
     ).setDepth(2);
+    card1.x = card1.displayWidth / 2 + this.cardMargin;
     const card2 = new Card(
       this,
       card1.displayWidth * 1.5 + this.cardMargin * 2,
@@ -210,11 +206,10 @@ export class ChooseCardScene extends Phaser.Scene {
       UnitService.units["Stranger"],
       true
     );
-    card1.x = card1.displayWidth / 2 + this.cardMargin;
+    this.cards.push(card1, card2, card3);
     this.add.existing(card1);
     this.add.existing(card2);
     this.add.existing(card3);
-    return { card1, card2, card3 };
   }
 
   addDeckButton() {
@@ -240,8 +235,7 @@ export class ChooseCardScene extends Phaser.Scene {
         buttonHeight,
         5
       );
-
-    // need this to click on chat button
+    // need this to click on button
     // as graphics objects are not interactive
     this.add
       .rectangle(
@@ -252,6 +246,7 @@ export class ChooseCardScene extends Phaser.Scene {
       )
       .setOrigin(0, 0)
       .setInteractive()
+      .setDepth(2)
       .on("pointerup", () => this.scene.launch("DeckScene"));
 
     this.add
@@ -262,6 +257,13 @@ export class ChooseCardScene extends Phaser.Scene {
         "Deck",
         32
       )
+      .setDepth(3)
       .setOrigin(0.5, 0.5);
   }
 }
+
+const arrayWithoutElementAtIndex = (cards: Card[], index: number) => {
+  return cards.filter((value, arrIndex) => {
+    return index !== arrIndex;
+  });
+};

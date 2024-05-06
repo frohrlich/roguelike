@@ -47,7 +47,7 @@ export class Card extends Phaser.GameObjects.Container {
     }
   }
 
-  private toggleCardView() {
+  toggleCardView() {
     this.getAll("name", "toggle").forEach((child) => {
       const myChild = child as Phaser.GameObjects.Image;
       myChild.setVisible(!myChild.visible);
