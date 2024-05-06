@@ -175,11 +175,13 @@ export class BattleScene extends Phaser.Scene {
         const grabbedCharacter = this.timeline.find((unit) => unit.isGrabbed);
         if (grabbedCharacter) {
           // if unit already there, swap positions
-          if (this.isUnitThere(tile.x, tile.y)) {
-            this.getUnitAtPos(tile.x, tile.y).teleportToPosition(
+          const unitToSwap = this.getUnitAtPos(tile.x, tile.y);
+          if (unitToSwap) {
+            unitToSwap.teleportToPosition(
               grabbedCharacter.indX,
               grabbedCharacter.indY
             );
+            unitToSwap.unselectUnit();
           }
           grabbedCharacter.teleportToPosition(tile.x, tile.y);
           grabbedCharacter.ungrabUnit();
