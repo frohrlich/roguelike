@@ -253,15 +253,19 @@ export class BattleScene extends Phaser.Scene {
   }
 
   displayBattleStartScreen() {
+    const battleStartText = "The battle begins !";
+    this.displayWholeScreenMessage(battleStartText, 1500);
+  }
+
+  private displayWholeScreenMessage(text: string, delay: number) {
     const screenCenterX = this.cameras.main.displayWidth / 2;
     const screenCenterY = this.cameras.main.displayHeight / 2;
-    const battleStartText = "The battle begins !";
-    const battleStart = this.add
-      .bitmapText(screenCenterX, screenCenterY, "dogicapixel", battleStartText)
+    const displayedText = this.add
+      .bitmapText(screenCenterX, screenCenterY, "dogicapixel", text)
       .setOrigin(0.5)
       .setScale(2)
       .setDepth(99999);
-    const battleStartOverlay = this.add
+    const overlay = this.add
       .rectangle(
         0,
         0,
@@ -270,14 +274,15 @@ export class BattleScene extends Phaser.Scene {
         0x999999,
         0.7
       )
+      .setInteractive()
       .setOrigin(0)
       .setDepth(99998);
 
     this.time.addEvent({
-      delay: 1500,
+      delay: delay,
       callback: () => {
-        battleStart.destroy();
-        battleStartOverlay.destroy();
+        displayedText.destroy();
+        overlay.destroy();
       },
       callbackScope: this,
     });
@@ -1186,15 +1191,23 @@ export class BattleScene extends Phaser.Scene {
   }
 
   winBattle() {
-    this.resetScene();
-    MapService.incrementPosition();
-    // if you reached the end of the last zone, you win !
-    if (MapService.zone >= MapService.zoneCount) {
-      this.resetGameState();
-      this.scene.start("EndScene", { isWin: true });
-    } else {
-      this.scene.start("ChooseCardScene", { isStarting: false });
-    }
+    const delay = 1500;
+    this.displayWholeScreenMessage("Victory !", delay);
+    this.time.addEvent({
+      delay: delay,
+      callback: () => {
+        this.resetScene();
+        MapService.incrementPosition();
+        // if you reached the end of the last zone, you win !
+        if (MapService.zone >= MapService.zoneCount) {
+          this.resetGameState();
+          this.scene.start("EndScene", { isWin: true });
+        } else {
+          this.scene.start("ChooseCardScene", { isStarting: false });
+        }
+      },
+      callbackScope: this,
+    });
   }
 
   private resetGameState() {

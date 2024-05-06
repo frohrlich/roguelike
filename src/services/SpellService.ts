@@ -129,35 +129,15 @@ export class SpellService {
     ),
     Punch: new Spell(68, 1, 1, 4, "Punch", true, false, 50),
     // DEV
-    // Sting: new Spell(
-    //   80,
-    //   0,
-    //   30,
-    //   0,
-    //   "Sting",
-    //   false,
-    //   false,
-    //   100,
-    //   0,
-    //   1,
-    //   0,
-    //   0,
-    //   0,
-    //   "monoTarget",
-    //   0,
-    //   0,
-    //   null
-    // ),
-    // PROD
     Sting: new Spell(
       80,
       0,
-      12,
-      2,
+      30,
+      0,
       "Sting",
-      true,
       false,
-      15,
+      false,
+      100,
       0,
       1,
       0,
@@ -165,8 +145,28 @@ export class SpellService {
       0,
       "monoTarget",
       0,
-      1
+      0,
+      null
     ),
+    // PROD
+    // Sting: new Spell(
+    //   80,
+    //   0,
+    //   12,
+    //   2,
+    //   "Sting",
+    //   true,
+    //   false,
+    //   15,
+    //   0,
+    //   1,
+    //   0,
+    //   0,
+    //   0,
+    //   "monoTarget",
+    //   0,
+    //   1
+    // ),
     // DEV
     // "Herbal medicine": new Spell(
     //   92,
