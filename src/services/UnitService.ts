@@ -38,14 +38,14 @@ export class UnitService {
       type: "Stranger",
       description: "...",
     },
-    Snowman: {
+    Ghost: {
       HP: 150,
       MP: 6,
       AP: 6,
       spells: "Biting",
       frame: 40,
-      type: "Snowman",
-      description: "Snow !",
+      type: "Ghost",
+      description: "Boo.",
     },
     Pig: {
       HP: 120,

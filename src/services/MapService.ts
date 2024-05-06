@@ -9,7 +9,7 @@ export class MapService {
 
   static zoneNames = ["forest", "corrupt_forest", "dungeon"];
 
-  static enemyTypes = ["Pig", "Wasp", "Snowman"];
+  static enemyTypes = ["Wasp", "Pig", "Ghost"];
 
   static zoneDescriptions = [
     "Your journey begins in a beautiful forest...",
