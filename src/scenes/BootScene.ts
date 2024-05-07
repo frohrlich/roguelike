@@ -100,6 +100,7 @@ export class BootScene extends Phaser.Scene {
     this.load.image("AmazonIllus", "public/assets/images/amazon.png");
     this.load.image("RenegadeIllus", "public/assets/images/renegade.png");
     this.load.image("StrangerIllus", "public/assets/images/stranger.png");
+    this.load.image("RangeBonusIllus", "public/assets/images/range_bonus.png");
     this.load.image(
       "forest_background",
       "public/assets/images/forest_background.png"

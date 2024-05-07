@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
 import { DeckService } from "../services/DeckService";
 import { UnitService } from "../services/UnitService";
+import { CharacterCard } from "../classes/cards/CharacterCard";
+import { BonusCard } from "../classes/cards/BonusCard";
 
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;
@@ -11,7 +13,7 @@ export class ChooseCardScene extends Phaser.Scene {
   cards: Card[];
   chooseText: Phaser.GameObjects.BitmapText;
   chooseButton: Phaser.GameObjects.Rectangle;
-  characterDescription: Phaser.GameObjects.BitmapText;
+  description: Phaser.GameObjects.BitmapText;
   unselectCardOverlay: Phaser.GameObjects.Rectangle;
 
   constructor() {
@@ -46,7 +48,7 @@ export class ChooseCardScene extends Phaser.Scene {
       ? "Choose your \nstarting\ncard !"
       : "Choose a\ncard !";
     if (this.chooseText.text === defaultText) {
-      this.chooseText.text = `Choose\n${type} ?`;
+      this.chooseText.text = `Choose\nthis card ?`;
       this.chooseText.tint = 0x00ff00;
       this.chooseButton.setVisible(true);
       this.chooseButton.displayWidth = this.chooseText.displayWidth + 5;
@@ -112,13 +114,13 @@ export class ChooseCardScene extends Phaser.Scene {
     const cardIndex = this.cards.findIndex((findCard) => findCard === card);
     const otherCards = arrayWithoutElementAtIndex(this.cards, cardIndex);
     this.toggleCardsVisibility(otherCards);
-    this.toggleChooseFighter(card.unitData.type);
-    this.currentCardChoice = card.unitData.type;
+    this.toggleChooseFighter(card.name);
+    this.currentCardChoice = card.name;
     this.toggleUnselectCardOverlay(card);
-    if (this.characterDescription.text === card.unitData.description) {
-      this.characterDescription.text = "";
+    if (this.description.text === card.descriptionText) {
+      this.description.text = "";
     } else {
-      this.characterDescription.text = card.unitData.description;
+      this.description.text = card.descriptionText;
     }
   }
 
@@ -132,7 +134,11 @@ export class ChooseCardScene extends Phaser.Scene {
         .once("pointerup", () => {
           this.toggleCardSelect(card);
           card.toggleCardView();
+          this.chooseText.setDepth(1);
+          this.chooseButton.setDepth(0);
         });
+      this.chooseText.setDepth(3);
+      this.chooseButton.setDepth(2);
     } else {
       this.unselectCardOverlay.destroy();
       this.unselectCardOverlay = null;
@@ -140,7 +146,7 @@ export class ChooseCardScene extends Phaser.Scene {
   }
 
   private addCharacterDescription() {
-    this.characterDescription = this.add.bitmapText(
+    this.description = this.add.bitmapText(
       10,
       this.cards[0].getBounds().bottom + 20,
       "dogicapixel",
@@ -163,7 +169,7 @@ export class ChooseCardScene extends Phaser.Scene {
         buttonText,
         24
       )
-      .setDepth(3)
+      .setDepth(1)
       .setOrigin(0, 0.5);
     const buttonMargin = 3;
     this.chooseButton = this.add
@@ -175,7 +181,6 @@ export class ChooseCardScene extends Phaser.Scene {
         0x003700
       )
       .setStrokeStyle(2, 0xffffff)
-      .setDepth(2)
       .setOrigin(0, 0.5)
       .setVisible(false)
       .setInteractive()
@@ -186,26 +191,39 @@ export class ChooseCardScene extends Phaser.Scene {
   }
 
   private addCards() {
-    const card1 = new Card(
+    const card1 = new CharacterCard(
       this,
       0,
       this.game.scale.height / 2,
+      false,
+      true,
       UnitService.units["Amazon"]
-    ).setDepth(2);
+    ).setDepth(4);
     card1.x = card1.displayWidth / 2 + this.cardMargin;
-    const card2 = new Card(
+    const card2 = new CharacterCard(
       this,
       card1.displayWidth * 1.5 + this.cardMargin * 2,
       this.game.scale.height / 2,
+      false,
+      true,
       UnitService.units["Renegade"]
-    ).setDepth(1);
-    const card3 = new Card(
+    ).setDepth(3);
+    // const card3 = new CharacterCard(
+    //   this,
+    //   card1.displayWidth * 2.5 + this.cardMargin * 3,
+    //   this.game.scale.height / 2,
+    //   true,
+    //   true,
+    //   UnitService.units["Stranger"]
+    // ).setDepth(2);
+    const card3 = new BonusCard(
       this,
       card1.displayWidth * 2.5 + this.cardMargin * 3,
       this.game.scale.height / 2,
-      UnitService.units["Stranger"],
-      true
-    );
+      true,
+      true,
+      DeckService.bonusCardsData["RangeBonus"]
+    ).setDepth(2);
     this.cards.push(card1, card2, card3);
     this.add.existing(card1);
     this.add.existing(card2);

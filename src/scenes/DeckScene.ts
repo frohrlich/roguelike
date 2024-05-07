@@ -1,7 +1,9 @@
 import Phaser from "phaser";
-import { Card } from "../classes/cards/Card";
 import { DeckService } from "../services/DeckService";
 import { UnitService } from "../services/UnitService";
+import { CharacterCard } from "../classes/cards/CharacterCard";
+import { Card } from "../classes/cards/Card";
+import { BonusCard } from "../classes/cards/BonusCard";
 
 export class DeckScene extends Phaser.Scene {
   marginY = 10;
@@ -77,14 +79,28 @@ export class DeckScene extends Phaser.Scene {
   private addCards() {
     for (let i = 0; i < DeckService.cards.length; i++) {
       const cardName = DeckService.cards[i];
-      const card = new Card(
-        this,
-        0,
-        0,
-        UnitService.units[cardName],
-        false,
-        false
-      ).setScale(0.65);
+      const unitData = UnitService.units[cardName];
+      let card: Card;
+      if (unitData) {
+        card = new CharacterCard(
+          this,
+          0,
+          0,
+          false,
+          false,
+          UnitService.units[cardName]
+        );
+      } else {
+        card = new BonusCard(
+          this,
+          0,
+          0,
+          false,
+          false,
+          DeckService.bonusCardsData[cardName]
+        );
+      }
+      card.setScale(0.65);
       this.add.existing(card);
       card.x =
         this.marginX / 2 +

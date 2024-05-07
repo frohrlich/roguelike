@@ -52,6 +52,9 @@ export class BattleScene extends Phaser.Scene {
   enemyStarterTiles: Phaser.Tilemaps.Tile[];
   isInPreparationPhase: boolean;
 
+  // bonuses from cards
+  rangeBonus = 0;
+
   constructor() {
     super({
       key: "BattleScene",
@@ -72,7 +75,9 @@ export class BattleScene extends Phaser.Scene {
     this.isPlayerTurn = false;
     this.spellVisible = false;
     this.isInPreparationPhase = true;
+    this.resetBonuses();
 
+    this.applyCardBonuses();
     this.createTilemap();
     this.addUnitsOnStart(data);
 
@@ -97,6 +102,26 @@ export class BattleScene extends Phaser.Scene {
 
     // and finally, player gets to choose their starter position
     this.chooseStartPosition();
+  }
+
+  applyCardBonuses() {
+    DeckService.cards.forEach((cardType) => {
+      const bonusData = DeckService.bonusCardsData[cardType];
+      if (bonusData) {
+        switch (bonusData.type) {
+          case "RangeBonus":
+            this.rangeBonus++;
+            break;
+
+          default:
+            break;
+        }
+      }
+    });
+  }
+
+  private resetBonuses() {
+    this.rangeBonus = 0;
   }
 
   // add event listener for spell unselect when clicking outside spell range
@@ -346,18 +371,19 @@ export class BattleScene extends Phaser.Scene {
     // we retrieve the player characters from the deck list
     DeckService.cards.forEach((card: string) => {
       const playerData = UnitService.units[card];
-
-      let x: number, y: number;
-      do {
-        const randTile = Phaser.Math.RND.between(
-          0,
-          this.allyStarterTiles.length - 1
-        );
-        const tile = this.allyStarterTiles[randTile];
-        x = tile.x;
-        y = tile.y;
-      } while (y < 2 || this.isAllyThere(x, y));
-      this.addUnit(playerData, x, y, false, true);
+      if (playerData) {
+        let x: number, y: number;
+        do {
+          const randTile = Phaser.Math.RND.between(
+            0,
+            this.allyStarterTiles.length - 1
+          );
+          const tile = this.allyStarterTiles[randTile];
+          x = tile.x;
+          y = tile.y;
+        } while (y < 2 || this.isAllyThere(x, y));
+        this.addUnit(playerData, x, y, false, true);
+      }
     });
 
     // enemy
@@ -848,7 +874,7 @@ export class BattleScene extends Phaser.Scene {
         this.overlays.push(overlay);
         const pos = new Phaser.Math.Vector2(tile.x, tile.y);
 
-        // on clicking on a tile, launch spell
+        // on clicking on a tile, cast spell
         overlay.on("pointerup", () => {
           this.currentPlayer.castSpell(this.currentSpell, pos);
         });
@@ -1066,14 +1092,19 @@ export class BattleScene extends Phaser.Scene {
 
   // calculate spell range
   calculateSpellRange(unit: Unit, spell: Spell) {
+    let bonusRange = 0;
+    // add bonus range to ranged spells only
+    if (spell.maxRange > 1) {
+      bonusRange = this.rangeBonus;
+    }
     return this.backgroundLayer?.filterTiles(
       (tile: Phaser.Tilemaps.Tile) =>
-        this.isTileAccessibleToSpell(unit, spell, tile),
+        this.isTileAccessibleToSpell(unit, spell, tile, bonusRange),
       this,
-      unit.indX - spell.maxRange,
-      unit.indY - spell.maxRange,
-      spell.maxRange * 2 + 1,
-      spell.maxRange * 2 + 1
+      unit.indX - spell.maxRange - bonusRange,
+      unit.indY - spell.maxRange - bonusRange,
+      (spell.maxRange + bonusRange) * 2 + 1,
+      (spell.maxRange + bonusRange) * 2 + 1
     );
   }
 
@@ -1081,14 +1112,15 @@ export class BattleScene extends Phaser.Scene {
   isTileAccessibleToSpell(
     unit: Unit,
     spell: Spell,
-    tile: Phaser.Tilemaps.Tile
+    tile: Phaser.Tilemaps.Tile,
+    bonusRange = 0
   ) {
     let startVec = new Phaser.Math.Vector2(unit.indX, unit.indY);
     let targetVec = new Phaser.Math.Vector2(tile.x, tile.y);
     let distance =
       Math.abs(startVec.x - targetVec.x) + Math.abs(startVec.y - targetVec.y);
     if (
-      distance <= spell.maxRange &&
+      distance <= spell.maxRange + bonusRange &&
       distance >= spell.minRange &&
       !this.transparentObstaclesLayer.getTileAt(tile.x, tile.y) &&
       (!this.obstaclesLayer.getTileAt(tile.x, tile.y) ||
