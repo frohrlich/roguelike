@@ -12,23 +12,23 @@ export class Player extends Unit {
     frame: number,
     indX: number,
     indY: number,
-    maxPm: number,
-    maxPa: number,
+    maxMp: number,
+    maxAp: number,
     maxHp: number,
     isAlly: boolean
   ) {
-    super(scene, x, y, texture, frame, indX, indY, maxPm, maxPa, maxHp, isAlly);
+    super(scene, x, y, texture, frame, indX, indY, maxMp, maxAp, maxHp, isAlly);
   }
 
   // plays at the end of deplacement
   override nextAction(): void {
-    this.myScene.clearAccessibleTiles();
-    this.myScene.refreshAccessibleTiles();
-    this.myScene.highlightAccessibleTiles(this.myScene.accessibleTiles);
+    this.battleScene.clearAccessibleTiles();
+    this.battleScene.refreshAccessibleTiles();
+    this.battleScene.highlightAccessibleTiles(this.battleScene.accessibleTiles);
   }
 
   override endTurn(): void {
-    const scene = this.myScene;
+    const scene = this.battleScene;
     scene.clearAccessibleTiles();
     scene.clearOverlay();
     scene.clearAoeZone();
@@ -37,13 +37,19 @@ export class Player extends Unit {
     super.endTurn();
   }
 
-  override castSpell(spell: Spell, targetVec: Phaser.Math.Vector2): void {
-    super.castSpell(spell, targetVec);
+  override castSpell(
+    spell: Spell,
+    targetVec: Phaser.Math.Vector2,
+    bonusDamage: number = 0
+  ): void {
+    super.castSpell(spell, targetVec, bonusDamage);
     // if spell not available anymore : quit spell mode
     if (this.ap < spell.cost || spell.cooldown > 0) {
-      this.myScene.clearSpellRange();
-      this.myScene.refreshAccessibleTiles();
-      this.myScene.highlightAccessibleTiles(this.myScene.accessibleTiles);
+      this.battleScene.clearSpellRange();
+      this.battleScene.refreshAccessibleTiles();
+      this.battleScene.highlightAccessibleTiles(
+        this.battleScene.accessibleTiles
+      );
     }
   }
 }

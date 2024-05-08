@@ -25,7 +25,8 @@ export class DeckScene extends Phaser.Scene {
   addBackground() {
     this.add
       .rectangle(0, 0, this.game.scale.width, this.game.scale.height, 0x000000)
-      .setOrigin(0, 0);
+      .setOrigin(0, 0)
+      .setInteractive();
   }
 
   addGoBackButton() {

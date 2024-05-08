@@ -116,7 +116,7 @@ export class UISpell extends UIElement {
     // }
     // spell damage
     if (this.spell.damage > 0) {
-      addText = `\n-${this.spell.damage} HP`;
+      addText = `\n-${this.getCalculatedDamage(this.spell)} HP`;
       text += addText;
     }
     // spell heal
@@ -317,5 +317,9 @@ export class UISpell extends UIElement {
     this.spellNameInfoText.destroy();
     this.outlineRectangle.destroy();
     this.spellCooldown.destroy();
+  }
+
+  getCalculatedDamage(spell: Spell) {
+    return spell.damage * (1 + this.battleScene.damageBonus * 0.01);
   }
 }

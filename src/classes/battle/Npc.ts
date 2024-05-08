@@ -47,7 +47,10 @@ export class Npc extends Unit {
           }
         }
       }
-    } else if (!this.myScene.battleIsFinished() && !this.myScene.gameIsOver()) {
+    } else if (
+      !this.battleScene.battleIsFinished() &&
+      !this.battleScene.gameIsOver()
+    ) {
       this.waitBeforeEndTurn();
     }
   }
@@ -74,7 +77,7 @@ export class Npc extends Unit {
   }
 
   private findNearestFoe() {
-    let foes = this.isAlly ? this.myScene.enemies : this.myScene.allies;
+    let foes = this.isAlly ? this.battleScene.enemies : this.battleScene.allies;
 
     let nearestFoe: Unit = null;
     let distance = 9999;
@@ -82,14 +85,14 @@ export class Npc extends Unit {
 
     foes.forEach((foe: Unit) => {
       // first check for foes already at contact
-      if (this.myScene.getManhattanDistance(this, foe) === 1) {
+      if (this.battleScene.getManhattanDistance(this, foe) === 1) {
         distance = 0;
         nearestFoe = foe;
         pathToNearestFoe = null;
         return { nearestFoe, pathToNearestFoe, distance };
       }
 
-      const path = this.myScene.getPathBetweenPositions(
+      const path = this.battleScene.getPathBetweenPositions(
         this.indX,
         this.indY,
         foe.indX,
@@ -128,7 +131,10 @@ export class Npc extends Unit {
       // wait till attack animation is finished
       // also verify npc didn't kill itself during spell cast
       // and that battle is not finished
-      if (!this.myScene.battleIsFinished() && !this.myScene.gameIsOver()) {
+      if (
+        !this.battleScene.battleIsFinished() &&
+        !this.battleScene.gameIsOver()
+      ) {
         this.waitBeforeEndTurn();
       }
     } else {
@@ -137,22 +143,25 @@ export class Npc extends Unit {
   }
 
   private isUnitTargetableWithSpell(spell: Spell, targetUnit: any) {
-    return this.myScene.isTileAccessibleToSpell(
+    return this.battleScene.isTileAccessibleToSpell(
       this,
       spell,
-      this.myScene.backgroundLayer.getTileAt(targetUnit.indX, targetUnit.indY)
+      this.battleScene.backgroundLayer.getTileAt(
+        targetUnit.indX,
+        targetUnit.indY
+      )
     );
   }
 
   // locates an accessible target for a given spell
   locateTarget(spell: Spell) {
-    return this.myScene.backgroundLayer?.findTile(
+    return this.battleScene.backgroundLayer?.findTile(
       (tile) =>
         // if there is a unit there, and it's an enemy, and there is a line of sight
         // then it's a valid target
-        this.myScene.isUnitThere(tile.x, tile.y) &&
-        this.isFoe(this.myScene.getUnitAtPos(tile.x, tile.y)!) &&
-        this.myScene.isTileAccessibleToSpell(this, spell, tile)
+        this.battleScene.isUnitThere(tile.x, tile.y) &&
+        this.isFoe(this.battleScene.getUnitAtPos(tile.x, tile.y)!) &&
+        this.battleScene.isTileAccessibleToSpell(this, spell, tile)
     );
   }
 

@@ -37,7 +37,8 @@ export class BonusCard extends Card {
         0,
         "dogicapixel",
         this.onCardDescriptionText,
-        this.descFontSize
+        this.descFontSize,
+        Phaser.GameObjects.BitmapText.ALIGN_CENTER
       )
         .setOrigin(0.5, 0.5)
         .setName("toggle")

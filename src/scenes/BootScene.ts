@@ -96,11 +96,21 @@ export class BootScene extends Phaser.Scene {
       frameHeight: 16,
     });
 
-    // illustrations
+    // character cards illustrations
     this.load.image("AmazonIllus", "public/assets/images/amazon.png");
     this.load.image("RenegadeIllus", "public/assets/images/renegade.png");
     this.load.image("StrangerIllus", "public/assets/images/stranger.png");
+    // bonus cards illustrations
     this.load.image("RangeBonusIllus", "public/assets/images/range_bonus.png");
+    this.load.image(
+      "DamageBonusIllus",
+      "public/assets/images/damage_bonus.png"
+    );
+    this.load.image("MpBonusIllus", "public/assets/images/mp_bonus.png");
+    this.load.image("ApBonusIllus", "public/assets/images/ap_bonus.png");
+    this.load.image("HpBonusIllus", "public/assets/images/hp_bonus.png");
+    this.load.image("EotBonusIllus", "public/assets/images/eot_bonus.png");
+    // backgrounds
     this.load.image(
       "forest_background",
       "public/assets/images/forest_background.png"

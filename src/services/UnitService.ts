@@ -57,7 +57,7 @@ export class UnitService {
       description: "Just some pig.",
     },
     Wasp: {
-      HP: 80,
+      HP: 100,
       MP: 8,
       AP: 6,
       spells: "Wasp sting",

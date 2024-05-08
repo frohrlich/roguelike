@@ -54,6 +54,11 @@ export class BattleScene extends Phaser.Scene {
 
   // bonuses from cards
   rangeBonus = 0;
+  damageBonus = 0; // percentage
+  mpBonus = 0;
+  apBonus = 0;
+  hpBonus = 0;
+  eotBonus = 0; // effect over time damage multiplier (percentage)
 
   constructor() {
     super({
@@ -112,7 +117,21 @@ export class BattleScene extends Phaser.Scene {
           case "RangeBonus":
             this.rangeBonus++;
             break;
-
+          case "DamageBonus":
+            this.damageBonus += 20;
+            break;
+          case "MpBonus":
+            this.mpBonus++;
+            break;
+          case "ApBonus":
+            this.apBonus++;
+            break;
+          case "HpBonus":
+            this.hpBonus += 20;
+            break;
+          case "EotBonus":
+            this.eotBonus += 100;
+            break;
           default:
             break;
         }
@@ -122,6 +141,11 @@ export class BattleScene extends Phaser.Scene {
 
   private resetBonuses() {
     this.rangeBonus = 0;
+    this.damageBonus = 0;
+    this.mpBonus = 0;
+    this.apBonus = 0;
+    this.hpBonus = 0;
+    this.eotBonus = 0;
   }
 
   // add event listener for spell unselect when clicking outside spell range
@@ -656,6 +680,9 @@ export class BattleScene extends Phaser.Scene {
     npc: boolean,
     allied: boolean
   ) {
+    const bonusMp = allied ? this.mpBonus : 0;
+    const bonusAp = allied ? this.apBonus : 0;
+    const bonusHp = allied ? this.hpBonus : 0;
     const key = "player";
     let unit: Unit;
     if (npc) {
@@ -681,9 +708,9 @@ export class BattleScene extends Phaser.Scene {
         unitData.frame,
         startX,
         startY,
-        unitData.MP,
-        unitData.AP,
-        unitData.HP,
+        unitData.MP + bonusMp,
+        unitData.AP + bonusAp,
+        unitData.HP + bonusHp,
         allied
       );
     }
@@ -876,7 +903,11 @@ export class BattleScene extends Phaser.Scene {
 
         // on clicking on a tile, cast spell
         overlay.on("pointerup", () => {
-          this.currentPlayer.castSpell(this.currentSpell, pos);
+          this.currentPlayer.castSpell(
+            this.currentSpell,
+            pos,
+            this.damageBonus
+          );
         });
         //on hovering over a tile, display aoe zone
         overlay.on("pointerover", () => {
@@ -890,7 +921,11 @@ export class BattleScene extends Phaser.Scene {
         const playerOnThisTile = this.getUnitAtPos(tile.x, tile.y);
         if (playerOnThisTile) {
           playerOnThisTile.on("pointerup", () => {
-            this.currentPlayer.castSpell(this.currentSpell, pos);
+            this.currentPlayer.castSpell(
+              this.currentSpell,
+              pos,
+              this.damageBonus
+            );
           });
           playerOnThisTile.on("pointerover", () => {
             this.updateAoeZone(spell, tile.pixelX, tile.pixelY);

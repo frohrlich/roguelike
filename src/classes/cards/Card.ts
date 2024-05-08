@@ -6,7 +6,7 @@ export class Card extends Phaser.GameObjects.Container {
   outlineWidth = 8;
   outlineColor = 0xffffff;
   fillColor = 0x191430;
-  illustrationTint = 0x333333;
+  illustrationTint = 0x666666;
   fontSize = 16;
   caracFontSize = 32;
 
@@ -99,7 +99,8 @@ export class Card extends Phaser.GameObjects.Container {
         -this.cardHeight / 2 + 10,
         "dogicapixelbold",
         name,
-        this.fontSize
+        this.fontSize,
+        Phaser.GameObjects.BitmapText.ALIGN_CENTER
       )
         .setScale(1.2)
         .setOrigin(0.5, 0)
