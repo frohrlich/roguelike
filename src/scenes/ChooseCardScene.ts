@@ -197,7 +197,7 @@ export class ChooseCardScene extends Phaser.Scene {
       this.game.scale.height / 2,
       false,
       true,
-      UnitService.units["Amazon"]
+      UnitService.units["Archer"]
     ).setDepth(4);
     card1.x = card1.displayWidth / 2 + this.cardMargin;
     // const card2 = new CharacterCard(

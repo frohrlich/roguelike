@@ -65,14 +65,14 @@ export class UnitService {
       type: "Wasp",
       description: "A really big wasp.",
     },
-    Princess: {
-      HP: 50,
-      MP: 3,
+    Archer: {
+      HP: 100,
+      MP: 4,
       AP: 6,
       spells: "Sting",
-      frame: 4,
-      type: "Princess",
-      description: "A typical princess.",
+      frame: 36,
+      type: "Archer",
+      description: "An elusive one, for sure.",
     },
   };
 }
