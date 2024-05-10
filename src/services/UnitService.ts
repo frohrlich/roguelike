@@ -6,6 +6,7 @@ export interface UnitData {
   frame: number;
   type: string;
   description: string;
+  isPlayable?: boolean;
 }
 
 /** This service contains the data for all available unit types in the game. */
@@ -19,6 +20,7 @@ export class UnitService {
       frame: 8,
       type: "Amazon",
       description: "A fearsome warrior. Always angry about something.",
+      isPlayable: true,
     },
     Renegade: {
       HP: 120,
@@ -28,6 +30,7 @@ export class UnitService {
       frame: 84,
       type: "Renegade",
       description: "In his dreams, he's still in the Colosseum.",
+      isPlayable: true,
     },
     Stranger: {
       HP: 80,
@@ -37,6 +40,7 @@ export class UnitService {
       frame: 88,
       type: "Stranger",
       description: "...",
+      isPlayable: true,
     },
     Ghost: {
       HP: 150,
@@ -73,6 +77,7 @@ export class UnitService {
       frame: 36,
       type: "Archer",
       description: "An elusive one, for sure.",
+      isPlayable: true,
     },
     Dog: {
       HP: 100,
@@ -82,6 +87,11 @@ export class UnitService {
       frame: 120,
       type: "Dog",
       description: "That's a dog.",
+      isPlayable: true,
     },
   };
+
+  static remainingUnits: { [key: string]: UnitData } = Object.fromEntries(
+    Object.entries(this.units).filter(([key, value]) => value.isPlayable)
+  );
 }

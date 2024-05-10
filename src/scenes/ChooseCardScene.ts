@@ -1,9 +1,10 @@
 import Phaser from "phaser";
 import { Card } from "../classes/cards/Card";
-import { DeckService } from "../services/DeckService";
-import { UnitService } from "../services/UnitService";
+import { BonusData, DeckService } from "../services/DeckService";
+import { UnitData, UnitService } from "../services/UnitService";
 import { CharacterCard } from "../classes/cards/CharacterCard";
 import { BonusCard } from "../classes/cards/BonusCard";
+import { MapService } from "../services/MapService";
 
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;
@@ -15,6 +16,8 @@ export class ChooseCardScene extends Phaser.Scene {
   chooseButton: Phaser.GameObjects.Rectangle;
   description: Phaser.GameObjects.BitmapText;
   unselectCardOverlay: Phaser.GameObjects.Rectangle;
+  remainingBonusCards: { [key: string]: BonusData };
+  remainingCharacterCards: { [key: string]: UnitData };
 
   constructor() {
     super({
@@ -24,6 +27,8 @@ export class ChooseCardScene extends Phaser.Scene {
 
   create(data: any) {
     this.cards = [];
+    this.remainingBonusCards = { ...DeckService.bonusCardsData };
+    this.remainingCharacterCards = { ...UnitService.remainingUnits };
     this.unselectCardOverlay = null;
     this.isStarting = data.isStarting;
     if (!this.isStarting) {
@@ -187,57 +192,69 @@ export class ChooseCardScene extends Phaser.Scene {
       .setVisible(false)
       .setInteractive()
       .on("pointerup", () => {
+        // remove unit from roster
+        delete UnitService.remainingUnits[this.currentCardChoice];
         DeckService.addCard(this.currentCardChoice);
         this.scene.start("MapScene");
       });
   }
 
   private addCards() {
-    const card1 = new CharacterCard(
+    let card1: Card, card2: Card, card3: Card;
+
+    // at each zone beginning, choose a new character
+    if (MapService.position === 0) {
+      card1 = this.addRandomCharacterCard();
+      card2 = this.addRandomCharacterCard();
+      card3 = this.addRandomCharacterCard();
+      // else choose a bonus card
+    } else {
+      card1 = this.addRandomBonusCard();
+      card2 = this.addRandomBonusCard();
+      card3 = this.addRandomBonusCard();
+    }
+
+    card1.setDepth(4).setX(card1.displayWidth / 2 + this.cardMargin);
+    card2.setDepth(3).setX(card1.displayWidth * 1.5 + this.cardMargin * 2);
+    card3.setDepth(2).setX(card1.displayWidth * 2.5 + this.cardMargin * 3);
+
+    this.cards.push(card1, card2, card3);
+    this.add.existing(card1);
+    this.add.existing(card2);
+    this.add.existing(card3);
+  }
+
+  private addRandomCharacterCard() {
+    const characterTypes = Object.keys(this.remainingCharacterCards);
+    const randIndex = Phaser.Math.RND.between(0, characterTypes.length - 1);
+    const characterType = characterTypes[randIndex];
+
+    const card = new CharacterCard(
       this,
       0,
       this.game.scale.height / 2,
       false,
       true,
-      UnitService.units["Archer"]
-    ).setDepth(4);
-    card1.x = card1.displayWidth / 2 + this.cardMargin;
-    const card2 = new CharacterCard(
+      this.remainingCharacterCards[characterType]
+    );
+    delete this.remainingCharacterCards[characterType];
+    return card;
+  }
+
+  private addRandomBonusCard() {
+    const bonusCardsTypes = Object.keys(this.remainingBonusCards);
+    const randIndex = Phaser.Math.RND.between(0, bonusCardsTypes.length - 1);
+    const bonusCardType = bonusCardsTypes[randIndex];
+    const card = new BonusCard(
       this,
-      card1.displayWidth * 1.5 + this.cardMargin * 2,
+      0,
       this.game.scale.height / 2,
       false,
       true,
-      UnitService.units["Dog"]
-    ).setDepth(3);
-    const card3 = new CharacterCard(
-      this,
-      card1.displayWidth * 2.5 + this.cardMargin * 3,
-      this.game.scale.height / 2,
-      true,
-      true,
-      UnitService.units["Stranger"]
-    ).setDepth(2);
-    // const card2 = new BonusCard(
-    //   this,
-    //   card1.displayWidth * 1.5 + this.cardMargin * 2,
-    //   this.game.scale.height / 2,
-    //   false,
-    //   true,
-    //   DeckService.bonusCardsData["HpBonus"]
-    // ).setDepth(3);
-    // const card3 = new BonusCard(
-    //   this,
-    //   card1.displayWidth * 2.5 + this.cardMargin * 3,
-    //   this.game.scale.height / 2,
-    //   true,
-    //   true,
-    //   DeckService.bonusCardsData["EotBonus"]
-    // ).setDepth(2);
-    this.cards.push(card1, card2, card3);
-    this.add.existing(card1);
-    this.add.existing(card2);
-    this.add.existing(card3);
+      this.remainingBonusCards[bonusCardType]
+    );
+    delete this.remainingBonusCards[bonusCardType];
+    return card;
   }
 
   addDeckButton() {

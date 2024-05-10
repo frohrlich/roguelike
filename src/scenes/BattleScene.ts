@@ -1282,6 +1282,11 @@ export class BattleScene extends Phaser.Scene {
   private resetGameState() {
     MapService.resetMap();
     DeckService.cards = [];
+    UnitService.remainingUnits = Object.fromEntries(
+      Object.entries(UnitService.units).filter(
+        ([key, value]) => value.isPlayable
+      )
+    );
   }
 
   resetScene() {

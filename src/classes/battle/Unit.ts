@@ -640,6 +640,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       if (!unit.isDead()) unit.die();
     });
     this.unselectUnit();
+    this.disableInteractive();
     this.battleScene.removeUnitFromBattle(this);
 
     if (
