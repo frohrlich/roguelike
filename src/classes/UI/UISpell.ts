@@ -5,6 +5,7 @@ import { BattleScene } from "../../scenes/BattleScene";
 
 export class UISpell extends UIElement {
   iconScale = 1.1;
+  highlightFrameFrame = 45;
 
   spell: Spell;
   icon: Phaser.GameObjects.Image;
@@ -25,7 +26,7 @@ export class UISpell extends UIElement {
     this.spell = spell;
     this.battleScene = this.myScene.battleScene;
     this.addRegularIcon();
-    this.addHighlightIcon();
+    this.addHighlightFrame();
     this.addInfoText();
     this.createSpellCooldown();
     this.disabled = false;
@@ -40,7 +41,7 @@ export class UISpell extends UIElement {
 
   addIcon(highlight: boolean) {
     const scale = this.myScene.uiScale;
-    const iconFrame = highlight ? this.spell.frame + 1 : this.spell.frame;
+    const iconFrame = highlight ? this.highlightFrameFrame : this.spell.frame;
 
     const icon = this.myScene.add
       .image(this.x, this.y, "player", iconFrame)
@@ -70,7 +71,7 @@ export class UISpell extends UIElement {
     this.addIcon(false);
   }
 
-  addHighlightIcon() {
+  addHighlightFrame() {
     this.addIcon(true);
   }
 
@@ -273,15 +274,7 @@ export class UISpell extends UIElement {
 
   override refresh(): void {
     this.createSpellCooldown();
-
-    if (this.isHighlighted) {
-      this.icon.visible = false;
-      this.highlightIcon.visible = true;
-    } else {
-      this.icon.visible = true;
-      this.highlightIcon.visible = false;
-    }
-
+    this.highlightIcon.visible = this.isHighlighted;
     this.hideIfInaccessible();
 
     if (this.spell.cooldown > 0) {

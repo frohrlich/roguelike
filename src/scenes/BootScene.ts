@@ -100,6 +100,8 @@ export class BootScene extends Phaser.Scene {
     this.load.image("AmazonIllus", "public/assets/images/amazon.png");
     this.load.image("RenegadeIllus", "public/assets/images/renegade.png");
     this.load.image("StrangerIllus", "public/assets/images/stranger.png");
+    this.load.image("ArcherIllus", "public/assets/images/archer.png");
+    this.load.image("DogIllus", "public/assets/images/dog.png");
     // bonus cards illustrations
     this.load.image("RangeBonusIllus", "public/assets/images/range_bonus.png");
     this.load.image(

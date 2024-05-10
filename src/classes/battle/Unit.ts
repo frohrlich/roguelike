@@ -491,11 +491,16 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
       this.hp -= damage;
       // no healing over max hp
-      this.hp = Math.min(this.hp + eot.heal, this.maxHp);
+      this.hp += eot.heal;
       this.ap -= eot.malusAP;
       this.ap += eot.bonusAP;
       this.mp -= eot.malusMP;
       this.mp += eot.bonusMP;
+
+      this.hp = Math.max(this.hp, 0);
+      this.hp = Math.min(this.hp, this.maxHp);
+      this.mp = Math.max(this.mp, 0);
+      this.ap = Math.max(this.ap, 0);
 
       this.updateHealthBar();
       eot.duration--;

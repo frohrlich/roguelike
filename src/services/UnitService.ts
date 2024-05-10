@@ -69,10 +69,19 @@ export class UnitService {
       HP: 100,
       MP: 4,
       AP: 6,
-      spells: "Sting",
+      spells: "Light arrow, Heavy arrow, Poisoned arrow",
       frame: 36,
       type: "Archer",
       description: "An elusive one, for sure.",
+    },
+    Dog: {
+      HP: 100,
+      MP: 6,
+      AP: 6,
+      spells: "Bone, Bite, Cheering",
+      frame: 120,
+      type: "Dog",
+      description: "That's a dog.",
     },
   };
 }

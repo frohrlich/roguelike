@@ -118,6 +118,8 @@ export class ChooseCardScene extends Phaser.Scene {
     this.currentCardChoice = card.name;
     this.toggleUnselectCardOverlay(card);
     if (this.description.text === card.descriptionText) {
+      this.chooseText.setDepth(1);
+      this.chooseButton.setDepth(0);
       this.description.text = "";
     } else {
       this.description.text = card.descriptionText;
@@ -200,38 +202,38 @@ export class ChooseCardScene extends Phaser.Scene {
       UnitService.units["Archer"]
     ).setDepth(4);
     card1.x = card1.displayWidth / 2 + this.cardMargin;
-    // const card2 = new CharacterCard(
-    //   this,
-    //   card1.displayWidth * 1.5 + this.cardMargin * 2,
-    //   this.game.scale.height / 2,
-    //   false,
-    //   true,
-    //   UnitService.units["Renegade"]
-    // ).setDepth(3);
-    // const card3 = new CharacterCard(
-    //   this,
-    //   card1.displayWidth * 2.5 + this.cardMargin * 3,
-    //   this.game.scale.height / 2,
-    //   true,
-    //   true,
-    //   UnitService.units["Stranger"]
-    // ).setDepth(2);
-    const card2 = new BonusCard(
+    const card2 = new CharacterCard(
       this,
       card1.displayWidth * 1.5 + this.cardMargin * 2,
       this.game.scale.height / 2,
       false,
       true,
-      DeckService.bonusCardsData["HpBonus"]
+      UnitService.units["Dog"]
     ).setDepth(3);
-    const card3 = new BonusCard(
+    const card3 = new CharacterCard(
       this,
       card1.displayWidth * 2.5 + this.cardMargin * 3,
       this.game.scale.height / 2,
       true,
       true,
-      DeckService.bonusCardsData["EotBonus"]
+      UnitService.units["Stranger"]
     ).setDepth(2);
+    // const card2 = new BonusCard(
+    //   this,
+    //   card1.displayWidth * 1.5 + this.cardMargin * 2,
+    //   this.game.scale.height / 2,
+    //   false,
+    //   true,
+    //   DeckService.bonusCardsData["HpBonus"]
+    // ).setDepth(3);
+    // const card3 = new BonusCard(
+    //   this,
+    //   card1.displayWidth * 2.5 + this.cardMargin * 3,
+    //   this.game.scale.height / 2,
+    //   true,
+    //   true,
+    //   DeckService.bonusCardsData["EotBonus"]
+    // ).setDepth(2);
     this.cards.push(card1, card2, card3);
     this.add.existing(card1);
     this.add.existing(card2);
