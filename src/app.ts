@@ -71,9 +71,9 @@ window.onload = () => {
     }
   });
 
-  gameDiv.hidden = false;
-  fullscreenButton.hidden = true;
-  fullscreenButtonDiv.style.display = "none";
+  // gameDiv.hidden = false;
+  // fullscreenButton.hidden = true;
+  // fullscreenButtonDiv.style.display = "none";
 
   var game = new RpgGame(config);
 };
