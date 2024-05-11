@@ -107,7 +107,18 @@ export class MapScene extends Phaser.Scene {
     const color = isDiscovered
       ? this.discoveredLocationColor
       : this.undiscoveredLocationColor;
-    this.add.rectangle(posX, posY, this.locationSize, this.locationSize, color);
+
+    this.add
+      .graphics()
+      .fillStyle(color)
+      .lineStyle(4, 0xffffff)
+      .fillRoundedRect(
+        posX - this.locationSize / 2,
+        posY - this.locationSize / 2,
+        this.locationSize,
+        this.locationSize,
+        10
+      );
     this.add
       .rectangle(posX, posY, this.locationSize / 2, this.locationSize / 2)
       .setStrokeStyle(this.innerRectangleLineWidth, 0xffffff);
