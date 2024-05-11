@@ -31,6 +31,7 @@ export class ChooseCardScene extends Phaser.Scene {
     this.remainingCharacterCards = { ...UnitService.remainingUnits };
     this.unselectCardOverlay = null;
     this.isStarting = data.isStarting;
+    this.addBackground();
     if (!this.isStarting) {
       this.addDeckButton();
     }
@@ -42,25 +43,30 @@ export class ChooseCardScene extends Phaser.Scene {
     this.addInfoTip();
   }
 
+  addBackground() {
+    this.add
+      .rectangle(0, 0, this.game.scale.width, this.game.scale.height, 0x000000)
+      .setOrigin(0, 0)
+      .setInteractive();
+  }
+
   toggleCardsVisibility = (cards: Card[]) => {
     cards.forEach((card) => {
       card.setVisible(!card.visible);
     });
   };
 
-  toggleChooseFighter = (type: string) => {
+  toggleChooseFighter = () => {
     const defaultText = this.isStarting
       ? "Choose your \nstarting\ncard !"
       : "Choose a\ncard !";
     if (this.chooseText.text === defaultText) {
       this.chooseText.text = `Choose\nthis card ?`;
-      this.chooseText.tint = 0x00ff00;
       this.chooseButton.setVisible(true);
       this.chooseButton.displayWidth = this.chooseText.displayWidth + 5;
       this.chooseButton.displayHeight = this.chooseText.displayHeight + 5;
     } else {
       this.chooseText.text = defaultText;
-      this.chooseText.tint = 0xffffff;
       this.chooseButton.setVisible(false);
     }
   };
@@ -119,7 +125,7 @@ export class ChooseCardScene extends Phaser.Scene {
     const cardIndex = this.cards.findIndex((findCard) => findCard === card);
     const otherCards = arrayWithoutElementAtIndex(this.cards, cardIndex);
     this.toggleCardsVisibility(otherCards);
-    this.toggleChooseFighter(card.name);
+    this.toggleChooseFighter();
     this.currentCardChoice = card.name;
     this.toggleUnselectCardOverlay(card);
     if (this.description.text === card.descriptionText) {
@@ -179,24 +185,45 @@ export class ChooseCardScene extends Phaser.Scene {
       .setDepth(1)
       .setOrigin(0, 0.5);
     const buttonMargin = 3;
+    const baseButtonBackgroundColor = 0x007700;
     this.chooseButton = this.add
       .rectangle(
         this.chooseText.x - buttonMargin,
         this.chooseText.y - buttonMargin / 2,
         this.chooseText.displayWidth - 6,
         this.chooseText.displayHeight + buttonMargin * 2,
-        0x003700
+        baseButtonBackgroundColor
       )
       .setStrokeStyle(2, 0xffffff)
       .setOrigin(0, 0.5)
       .setVisible(false)
       .setInteractive()
+      .on("pointerdown", () => {
+        this.chooseButton.setFillStyle(0x005500);
+      })
+      .on("pointerout", () => {
+        this.chooseButton.setFillStyle(baseButtonBackgroundColor);
+      })
       .on("pointerup", () => {
-        // remove unit from roster
-        delete UnitService.remainingUnits[this.currentCardChoice];
-        DeckService.addCard(this.currentCardChoice);
-        this.scene.start("MapScene");
+        this.chooseButton.setFillStyle(baseButtonBackgroundColor);
+        this.confirmCardChoice();
       });
+  }
+
+  private confirmCardChoice() {
+    // remove unit from roster
+    delete UnitService.remainingUnits[this.currentCardChoice];
+    DeckService.addCard(this.currentCardChoice);
+    // transition effect
+    const fx = this.cameras.main.postFX.addWipe(0.3, 0, 0);
+    this.scene.transition({
+      target: "MapScene",
+      duration: 1000,
+      moveBelow: true,
+      onUpdate: (progress: number) => {
+        fx.progress = progress;
+      },
+    });
   }
 
   private addCards() {
@@ -261,10 +288,11 @@ export class ChooseCardScene extends Phaser.Scene {
     const buttonWidth = 130;
     const buttonHeight = 60;
     const margin = 9;
+    const deckButtonColor = 0x1f301d;
 
     this.add
       .graphics()
-      .fillStyle(0x1f301d)
+      .fillStyle(deckButtonColor)
       .lineStyle(4, 0xffffff)
       .fillRoundedRect(
         this.game.scale.width - buttonWidth - margin,

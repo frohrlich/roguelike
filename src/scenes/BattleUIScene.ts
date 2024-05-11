@@ -25,10 +25,13 @@ export class BattleUIScene extends Phaser.Scene {
   uiTimelineBackgrounds: Phaser.GameObjects.Rectangle[] = [];
   handle: Phaser.GameObjects.Rectangle;
   unitStats: UnitStatDisplay;
-  buttonText: Phaser.GameObjects.BitmapText;
-  button: Phaser.GameObjects.Rectangle;
+  startButtonText: Phaser.GameObjects.BitmapText;
+  startButton: Phaser.GameObjects.Rectangle;
   mapWidth: number;
   height: number;
+
+  private readonly baseStartButtonColor = 0x293154;
+  private readonly onClickStartButtonColor = 0x181f33;
 
   constructor() {
     super({
@@ -37,6 +40,7 @@ export class BattleUIScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.cameras.main.fadeIn(1000, 0, 0, 0);
     this.battleScene = this.scene.get("BattleScene") as BattleScene;
     this.unitStats = null;
     this.uiSpells = [];
@@ -77,17 +81,12 @@ export class BattleUIScene extends Phaser.Scene {
     const yPos = this.uiTabHeight * 2.33 + 1;
     const xPos = this.leftX + this.uiTabWidth * 0.5;
 
-    this.button = this.add
+    this.startButton = this.add
       .rectangle(xPos, yPos, this.uiTabWidth * 0.85, this.uiTabHeight * 0.56)
       .setStrokeStyle(2, 0xcccccc)
-      .setFillStyle(0x293154)
-      .setInteractive()
-      .on("pointerup", () => {
-        this.battleScene.startBattle();
-      });
-
+      .setInteractive();
     let fontSize = this.buttonTextFontSize;
-    this.buttonText = this.add
+    this.startButtonText = this.add
       .bitmapText(
         xPos,
         yPos + textTopMargin,
@@ -95,44 +94,46 @@ export class BattleUIScene extends Phaser.Scene {
         "Fight !",
         fontSize
       )
-      .setTint(this.uiFontColor)
       .setOrigin(0.5, 0.5)
       .setCenterAlign();
-  }
-
-  setButtonToReady() {
-    this.button.setFillStyle(0x00ff00);
-    this.buttonText.tint = 0x000000;
-  }
-
-  setButtonToNotReady() {
-    this.button.setFillStyle(0x293154);
-    this.buttonText.tint = this.uiFontColor;
+    this.activateEndTurnButton(true);
   }
 
   /** Changes start button to end turn button for the main phase of the battle. */
   createEndTurnButton() {
-    this.deactivateEndTurnButtonVisually();
-    this.buttonText.text = "End\nturn";
-    this.button.off("pointerup");
-    this.button.on("pointerup", () => {
-      if (
-        this.battleScene.isPlayerTurn &&
-        !this.battleScene.currentPlayer.isMoving
-      ) {
-        this.battleScene.currentPlayer.endTurn();
-      }
-    });
+    this.deactivateEndTurnButton();
+    this.startButtonText.text = "End\nturn";
   }
 
-  deactivateEndTurnButtonVisually() {
-    this.button.setFillStyle(0x15192b);
-    this.buttonText.setTint(0x00701c);
+  deactivateEndTurnButton() {
+    this.startButton.setFillStyle(0x15192b);
+    this.startButtonText.setTint(0x00701c);
+    this.startButton.off("pointerup");
+    this.startButton.off("pointerdown");
+    this.startButton.off("pointerout");
   }
 
-  activateEndTurnButtonVisually() {
-    this.button.setFillStyle(0x293154);
-    this.buttonText.setTint(this.uiFontColor);
+  activateEndTurnButton(isStart: boolean = false) {
+    this.startButtonText.setTint(this.uiFontColor);
+    this.startButton
+      .setFillStyle(this.baseStartButtonColor)
+      .on("pointerdown", () => {
+        this.startButton.setFillStyle(this.onClickStartButtonColor);
+      })
+      .on("pointerout", () => {
+        this.startButton.setFillStyle(this.baseStartButtonColor);
+      })
+      .on("pointerup", () => {
+        this.startButton.setFillStyle(this.baseStartButtonColor);
+        if (isStart) {
+          this.battleScene.startBattle();
+        } else if (
+          this.battleScene.isPlayerTurn &&
+          !this.battleScene.currentPlayer.isMoving
+        ) {
+          this.battleScene.currentPlayer.endTurn();
+        }
+      });
   }
 
   updateTimeline(timeline: Unit[], isPreparationPhase = false) {
@@ -286,11 +287,11 @@ export class BattleUIScene extends Phaser.Scene {
     this.clearSpellsHighlight();
     this.refreshSpells();
     this.disableSpells(true);
-    this.deactivateEndTurnButtonVisually();
+    this.deactivateEndTurnButton();
   }
 
   startPlayerTurn() {
-    this.activateEndTurnButtonVisually();
+    this.activateEndTurnButton();
     this.changeStatsUnit(this.battleScene.currentPlayer);
     this.refreshSpells();
     this.disableSpells(false);

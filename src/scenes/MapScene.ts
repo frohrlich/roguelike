@@ -56,7 +56,7 @@ export class MapScene extends Phaser.Scene {
       .setDepth(1)
       .setOrigin(0.5, 0.5);
     const buttonMargin = 12;
-    this.add
+    const startButton = this.add
       .rectangle(
         chooseText.x,
         chooseText.y - buttonMargin / 2,
@@ -67,11 +67,28 @@ export class MapScene extends Phaser.Scene {
       .setStrokeStyle(2, 0xffffff)
       .setOrigin(0.5, 0.5)
       .setInteractive()
+      .on("pointerdown", () => {
+        startButton.setFillStyle(0x007c00);
+      })
+      .on("pointerout", () => {
+        startButton.setFillStyle(0x00aa00);
+      })
       .on("pointerup", () => {
+        startButton.setFillStyle(0x00aa00);
+        this.goToBattle();
+      });
+  }
+
+  private goToBattle() {
+    this.cameras.main.fadeOut(1000, 0, 0, 0);
+    this.cameras.main.once(
+      Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE,
+      () => {
         this.scene.start("BattleScene", {
           enemyType: MapService.getCurrentEnemy(),
         });
-      });
+      }
+    );
   }
 
   private createLocationIcons() {

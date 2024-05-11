@@ -75,6 +75,7 @@ export class BattleScene extends Phaser.Scene {
   }
 
   create(data: any): void {
+    this.cameras.main.fadeIn(1000, 0, 0, 0);
     // refresh scene to its original state
     this.timelineIndex = 0;
     this.isPlayerTurn = false;
@@ -106,6 +107,7 @@ export class BattleScene extends Phaser.Scene {
     this.uiScene = this.scene.get("BattleUIScene") as BattleUIScene;
 
     // and finally, player gets to choose their starter position
+    this.displayWholeScreenMessage("Preparation phase", 2000);
     this.chooseStartPosition();
   }
 
@@ -303,11 +305,6 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
-  displayBattleStartScreen() {
-    const battleStartText = "The battle begins !";
-    this.displayWholeScreenMessage(battleStartText, 1500);
-  }
-
   private displayWholeScreenMessage(text: string, delay: number) {
     const screenCenterX = this.cameras.main.displayWidth / 2;
     const screenCenterY = this.cameras.main.displayHeight / 2;
@@ -347,7 +344,7 @@ export class BattleScene extends Phaser.Scene {
     this.clearOverlay();
     this.enemyStarterTiles = [];
     this.allyStarterTiles = [];
-    this.displayBattleStartScreen();
+    this.displayWholeScreenMessage("The battle begins !", 1000);
     this.addSpellUnselectListener();
     this.highlightCurrentUnitInTimeline();
     this.uiScene.createEndTurnButton();
