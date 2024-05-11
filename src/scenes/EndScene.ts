@@ -26,7 +26,7 @@ export class EndScene extends Phaser.Scene {
       .setDepth(1)
       .setOrigin(0.5, 0.5);
     const buttonMargin = 12;
-    this.add
+    const startButton = this.add
       .rectangle(
         text.x,
         text.y - buttonMargin / 2,
@@ -37,7 +37,14 @@ export class EndScene extends Phaser.Scene {
       .setStrokeStyle(2, 0xffffff)
       .setOrigin(0.5, 0.5)
       .setInteractive()
+      .on("pointerdown", () => {
+        startButton.setFillStyle(0x007c00);
+      })
+      .on("pointerout", () => {
+        startButton.setFillStyle(0x00aa00);
+      })
       .on("pointerup", () => {
+        startButton.setFillStyle(0x00aa00);
         this.scene.start("ChooseCardScene", { isStarting: true });
       });
   }
