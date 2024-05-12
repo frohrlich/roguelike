@@ -89,6 +89,16 @@ export class UnitService {
       description: "That's a dog.",
       isPlayable: true,
     },
+    Mage: {
+      HP: 100,
+      MP: 3,
+      AP: 6,
+      spells: "Gravity, Heavy rain, Staff",
+      frame: 124,
+      type: "Mage",
+      description: "Scary.",
+      isPlayable: true,
+    },
   };
 
   static remainingUnits: { [key: string]: UnitData } = Object.fromEntries(
