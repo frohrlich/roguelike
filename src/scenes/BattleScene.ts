@@ -720,8 +720,8 @@ export class BattleScene extends Phaser.Scene {
     }
 
     // set player start position
-    let initialPlayerX = unit.tilePosToPixelsX();
-    let initialPlayerY = unit.tilePosToPixelsY();
+    let initialPlayerX = unit.tilePosToPixelsX(unit.indX);
+    let initialPlayerY = unit.tilePosToPixelsY(unit.indY);
     unit.setPosition(initialPlayerX, initialPlayerY);
     const unitScale = 1.5;
     unit.setScale(unitScale);

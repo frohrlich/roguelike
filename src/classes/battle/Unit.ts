@@ -4,6 +4,13 @@ import { Spell } from "./Spell";
 import { UITimelineSlot } from "../UI/UITimelineSlot";
 import { EffectOverTime } from "./EffectOverTime";
 
+interface DisplayedEffect {
+  value: number;
+  type: string;
+  isBlink?: boolean;
+  isPositive?: boolean;
+}
+
 export class Unit extends Phaser.GameObjects.Sprite {
   // use these to manipulate sprite positions around units (healthbar, effect icons etc)
   healthBarOverUnitOffset = 7;
@@ -14,7 +21,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   selectedTint = 0x777777;
   grabbedTint = 0x6666ff;
-  private readonly identifierFrame = 44;
+  allyColor = 0x0000ff;
+  enemyColor = 0xff0000;
+  identifierFrame = 44;
 
   battleScene: BattleScene;
   // position on the grid
@@ -40,20 +49,16 @@ export class Unit extends Phaser.GameObjects.Sprite {
   moveChain: any = {};
   frameNumber: number;
   isAlly: boolean;
-  healthBar!: Phaser.GameObjects.Graphics;
+  healthBar: Phaser.GameObjects.Graphics;
   // team identifier under unit's feet (blue ally, red enemy)
   identifier: Phaser.GameObjects.Image;
   spells: Spell[] = [];
-  timelineSlot!: UITimelineSlot;
+  timelineSlot: UITimelineSlot;
   effectOverTime: EffectOverTime = null;
   effectIcon: Phaser.GameObjects.Image;
   summonedUnits: Unit[] = [];
   isSelected: boolean;
   isGrabbed = false;
-
-  private readonly allyColor = 0x0000ff;
-
-  private readonly enemyColor = 0xff0000;
 
   constructor(
     scene: Phaser.Scene,
@@ -87,15 +92,13 @@ export class Unit extends Phaser.GameObjects.Sprite {
     // tween move chain setup
     this.moveChain.targets = this;
     this.moveChain.onStart = () => {
-      // depth is same as y
-      // so units lower on the screen appear on top
-      this.depth = this.y;
       this.isMoving = true;
     };
     this.moveChain.onComplete = this.stopMovement;
     this.moveChain.tweens = [];
 
     this.addHoverEvents();
+
     if (this.isAlly) {
       this.addClickEvents();
     }
@@ -116,6 +119,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       if (!prevGrab) {
         this.grabUnit();
       } else if (prevGrab === this) {
+        // ungrab unit if it's already grabbed
         this.ungrabUnit();
       }
     });
@@ -163,7 +167,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.battleScene.uiScene.changeStatsUnit(this.battleScene.currentPlayer);
   }
 
-  // refills movement points at turn beginning
+  /** Refills movement and action points at turn beginning. */
   refillPoints() {
     this.mp = this.maxMp;
     this.ap = this.maxAp;
@@ -171,7 +175,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   // move along a path
   moveAlong(path: Phaser.Math.Vector2[]) {
-    if (!path || path.length <= 0 || path.length > this.mp) {
+    this.battleScene.removeFromObstacleLayer(this);
+
+    if (!path || path.length <= 0) {
       if (this.isMoving) {
         // when end of path is reached, start the chain of movement tweens
         this.scene.tweens.chain(this.moveChain);
@@ -180,84 +186,55 @@ export class Unit extends Phaser.GameObjects.Sprite {
     }
 
     this.movePath = path;
-    this.moveTo(this.movePath.shift()!);
+    this.moveTo(this.movePath.shift());
   }
 
-  // check next direction to take, update tile position and mp,
-  // and call move function that adds the actual movement to the tween chain
+  /** Check next direction to take
+   *   and call move function that adds the actual movement to the tween chain.
+   */
   moveTo(target: Phaser.Math.Vector2) {
-    this.battleScene.removeFromObstacleLayer(this);
-    let { x, y } = target;
-    // left
-    if (this.indX - x == 1) {
+    this.isMoving = true;
+
+    const targetIndX = target.x;
+    const targetIndY = target.y;
+
+    if (this.indX - targetIndX > 0) {
       this.direction = "left";
-      this.move(this.direction);
-      this.indX--;
-      this.mp--;
-    }
-    // right
-    else if (this.indX - x == -1) {
+    } else if (this.indX - targetIndX < 0) {
       this.direction = "right";
-      this.move(this.direction);
-      this.indX++;
-      this.mp--;
-      // down
-    } else if (this.indY - y == -1) {
+    } else if (this.indY - targetIndY < 0) {
       this.direction = "down";
-      this.move(this.direction);
-      this.indY++;
-      this.mp--;
-      // up
-    } else if (this.indY - y == 1) {
+    } else if (this.indY - targetIndY > 0) {
       this.direction = "up";
-      this.move(this.direction);
-      this.indY--;
-      this.mp--;
+    } else {
+      this.direction = "down"; // just in case, to avoid missing animations warning
     }
-    this.battleScene.addToObstacleLayer(
-      new Phaser.Math.Vector2(this.indX, this.indY)
-    );
+
+    this.move(targetIndX, targetIndY, this.direction);
+
+    this.mp--;
+    this.indX = targetIndX;
+    this.indY = targetIndY;
+
     this.moveAlong(this.movePath);
   }
 
-  // actual moving of the player
-  // via tweens
-  move(direction: string) {
-    this.isMoving = true;
-    if (direction === "left" || direction === "right") {
-      const deltaX = direction === "left" ? -1 : 1;
-      this.moveChain.tweens.push({
-        x: this.tilePosToPixelsX(deltaX),
-        ease: "Linear",
-        onStart: () => {
-          this.startMovingAnim(direction);
-          this.depth = this.y;
-        },
-        onUpdate: () => {
-          this.moveUnitAttributes();
-        },
-        duration: 300,
-        repeat: 0,
-        yoyo: false,
-      });
-    } else {
-      const deltaY = direction === "up" ? -1 : 1;
-      this.moveChain.tweens.push({
-        y: this.tilePosToPixelsY(deltaY),
-        ease: "Linear",
-        onStart: () => {
-          this.startMovingAnim(direction);
-          this.depth = this.y;
-        },
-        onUpdate: () => {
-          this.moveUnitAttributes();
-          this.depth = this.y;
-        },
-        duration: 300,
-        repeat: 0,
-        yoyo: false,
-      });
-    }
+  private move(targetIndX: number, targetIndY: number, direction: string) {
+    this.moveChain.tweens.push({
+      x: this.tilePosToPixelsX(targetIndX),
+      y: this.tilePosToPixelsY(targetIndY),
+      ease: "Linear",
+      onStart: () => {
+        this.startMovingAnim(direction);
+      },
+      onUpdate: () => {
+        this.moveUnitAttributes();
+        this.depth = this.y;
+      },
+      duration: 300,
+      repeat: 0,
+      yoyo: false,
+    });
   }
 
   private moveUnitAttributes() {
@@ -271,8 +248,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.identifier.y = this.y;
   }
 
-  // stop player movement
-  // and their animations too
+  /**
+   * Stop unit movement and their animations, and trigger additional actions if needed.
+   */
   stopMovement = () => {
     this.battleScene.addToObstacleLayer(
       new Phaser.Math.Vector2(this.indX, this.indY)
@@ -287,14 +265,14 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.emit("endOfDeplacementReached", this);
   };
 
-  // convert the tile position (index) of the unit to actual pixel position
-  // with optional delta
-  tilePosToPixelsX(delta: number = 0) {
-    return this.battleScene.tileWidth * (this.indX + delta) + this.width / 2;
+  /** Converts a X tile position (index) to actual unit pixel position. */
+  tilePosToPixelsX(indX: number) {
+    return this.battleScene.tileWidth * indX + this.width / 2;
   }
 
-  tilePosToPixelsY(delta: number = 0) {
-    return this.battleScene.tileHeight * (this.indY + delta) + this.height / 6;
+  /** Converts a Y tile position (index) to actual unit pixel position. */
+  tilePosToPixelsY(indY: number) {
+    return this.battleScene.tileHeight * indY + this.height / 6;
   }
 
   startMovingAnim = (direction: string) => {
@@ -306,7 +284,6 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.play(direction + "Attack" + this.type, true);
   };
 
-  // these three methods are redefined by subclasses
   playTurn() {
     this.identifier.tint = 0xffffff;
     this.undergoEffectOverTime();
@@ -355,8 +332,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
         const isForward = isAlignedX
           ? Math.sign(targetVec.x - this.indX)
           : Math.sign(targetVec.y - this.indY);
-        unit.isMovedToNewPosition(spell.moveTargetBy, isAlignedX, isForward);
-
+        unit.moveDirectlyToNewPosition(
+          spell.moveTargetBy,
+          isAlignedX,
+          isForward
+        );
         if (this.battleScene.currentPlayer) {
           this.battleScene.refreshAccessibleTiles();
         }
@@ -401,7 +381,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       this.addEffectOverTime(spell.effectOverTime);
     }
     this.updateHealthBar();
-    this.displaySpellEffect(
+    this.displaySpellOrEffectOverTimeEffects(
       calculatedDamage,
       spell.malusMP,
       spell.malusAP,
@@ -413,8 +393,12 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.checkDead();
   }
 
-  // move function without animations used for push/pull spells
-  isMovedToNewPosition(value: number, isAlignedX: boolean, isForward: number) {
+  /** Move function for push/pull spells. */
+  moveDirectlyToNewPosition(
+    value: number,
+    isAlignedX: boolean,
+    isForward: number
+  ) {
     this.battleScene.removeFromObstacleLayer(this);
     if (isAlignedX) {
       let deltaX = value * isForward;
@@ -434,7 +418,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       if (deltaX) {
         this.battleScene.tweens.add({
           targets: this,
-          x: this.tilePosToPixelsX(deltaX),
+          x: this.tilePosToPixelsX(this.indX + deltaX),
           ease: "Linear",
           onUpdate: () => {
             this.moveUnitAttributes();
@@ -463,7 +447,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       if (deltaY) {
         this.battleScene.tweens.add({
           targets: this,
-          y: this.tilePosToPixelsY(deltaY),
+          y: this.tilePosToPixelsY(this.indY + deltaY),
           ease: "Linear",
           onUpdate: () => {
             this.moveUnitAttributes();
@@ -504,7 +488,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
       this.updateHealthBar();
       eot.duration--;
-      this.displaySpellEffect(
+      this.displaySpellOrEffectOverTimeEffects(
         damage,
         eot.malusMP,
         eot.malusAP,
@@ -521,8 +505,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     }
   }
 
-  // display damage animation when unit is hit
-  displaySpellEffect(
+  displaySpellOrEffectOverTimeEffects(
     damage: number,
     malusMP: number,
     malusAP: number,
@@ -530,57 +513,48 @@ export class Unit extends Phaser.GameObjects.Sprite {
     bonusMP: number,
     bonusAP: number
   ) {
-    let dmgDelay = 0;
-    const scene = this.scene;
+    const delayBetweenEffects = 400;
+    const effects: DisplayedEffect[] = [];
+
     if (damage > 0) {
       // display damage with unit blinking red
-      this.displayEffect(scene, damage, "damage", true);
-      dmgDelay = 400;
+      effects.push({ value: damage, type: "damage", isBlink: true });
     }
-    if (!this.isDead()) {
-      scene.time.delayedCall(dmgDelay, () => {
-        let healDelay = 0;
-        // display heal in green (no blinking)
-        if (heal > 0) {
-          this.displayEffect(scene, heal, "heal", false, true);
-          healDelay = 400;
-        }
-        scene.time.delayedCall(healDelay, () => {
-          let mpDelay = 0;
-          // display MP malus in white
-          if (malusMP > 0) {
-            this.displayEffect(scene, malusMP, "mp");
-            mpDelay = 400;
-          }
-          scene.time.delayedCall(mpDelay, () => {
-            let bonusMpDelay = 0;
-            // display MP bonus in white
-            if (bonusMP > 0) {
-              this.displayEffect(scene, bonusMP, "mp", false, true);
-              bonusMpDelay = 400;
-            }
-            scene.time.delayedCall(bonusMpDelay, () => {
-              let apDelay = 0;
-              // display AP malus in blue
-              if (malusAP > 0) {
-                this.displayEffect(scene, malusAP, "ap");
-                apDelay = 400;
-              }
-              scene.time.delayedCall(apDelay, () => {
-                // display AP bonus in blue
-                if (bonusAP > 0) {
-                  this.displayEffect(scene, bonusAP, "ap", false, true);
-                }
-              });
-            });
-          });
-        });
-      });
+    if (heal > 0) {
+      effects.push({ value: heal, type: "heal", isPositive: true });
+    }
+    if (malusMP > 0) {
+      effects.push({ value: malusMP, type: "mp" });
+    }
+    if (bonusMP > 0) {
+      effects.push({ value: bonusMP, type: "mp", isPositive: true });
+    }
+    if (malusAP > 0) {
+      effects.push({ value: malusAP, type: "ap" });
+    }
+    if (bonusAP > 0) {
+      effects.push({ value: bonusAP, type: "ap", isPositive: true });
+    }
+    // delay between each effect display
+    for (let i = 0; i < effects.length; i++) {
+      const effect = effects[i];
+      ((i) => {
+        setTimeout(() => {
+          this.displayEffect(
+            effect.value,
+            effect.type,
+            effect.isBlink,
+            effect.isPositive
+          );
+        }, delayBetweenEffects * i);
+      })(i);
+      if (this.isDead()) {
+        return;
+      }
     }
   }
 
   displayEffect(
-    scene: Phaser.Scene,
     value: number,
     type: string,
     blink: boolean = false,
@@ -588,7 +562,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   ) {
     let color: number;
     const fontSize = 16;
-    if (blink) this.tint = 0xff0000;
+    if (blink && !this.isDead()) this.tint = 0xff0000;
     switch (type) {
       case "damage":
         color = 0xff0000;
@@ -606,7 +580,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
         break;
     }
     let isOnTop = this.indY < 2;
-    let malus = scene.add
+    let malus = this.scene.add
       .bitmapText(
         this.x - 2,
         isOnTop ? this.y + 20 : this.y - this.displayHeight + 5,
@@ -618,11 +592,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
     malus.setDepth(10001);
     malus.setOrigin(0.5, 0.5);
     // disappears after short time
-    scene.time.delayedCall(
+    this.scene.time.delayedCall(
       300,
       () => {
         malus.destroy();
-        if (blink) this.tint = 0xffffff;
+        if (blink && !this.isDead()) this.tint = 0xffffff;
       },
       undefined,
       malus
@@ -739,7 +713,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.direction = direction;
   }
 
-  // refresh UI infos like player stats
+  /** Refresh UI infos like player stats. */
   refreshUI() {
     this.battleScene.uiScene.refreshUI();
   }
@@ -755,7 +729,6 @@ export class Unit extends Phaser.GameObjects.Sprite {
   }
 
   setBarValue(bar: Phaser.GameObjects.Graphics, percentage: number) {
-    //scale the bar
     bar.scaleX = percentage / 100;
   }
 
@@ -791,7 +764,6 @@ export class Unit extends Phaser.GameObjects.Sprite {
       : this.y - this.displayHeight - this.healthBarOverUnitOffset;
   }
 
-  // add spells to a unit
   addSpells(...spells: Spell[]) {
     const copySpells = [];
     // each unit must have its own copy of each spell to manage cooldowns separately
@@ -801,7 +773,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.spells = this.spells.concat(copySpells);
   }
 
-  // links unit to its timeline slot on the UI
+  /** Links unit to its timeline slot on the UI. */
   addTimelineSlot(slot: UITimelineSlot) {
     this.timelineSlot = slot;
   }
@@ -839,8 +811,8 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.indX = indX;
     this.indY = indY;
     this.battleScene.addToObstacleLayer(new Phaser.Math.Vector2(indX, indY));
-    this.x = this.tilePosToPixelsX();
-    this.y = this.tilePosToPixelsY();
+    this.x = this.tilePosToPixelsX(indX);
+    this.y = this.tilePosToPixelsY(indY);
     this.depth = this.y;
     this.moveUnitAttributes();
   }

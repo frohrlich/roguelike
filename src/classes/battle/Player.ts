@@ -20,7 +20,7 @@ export class Player extends Unit {
     super(scene, x, y, texture, frame, indX, indY, maxMp, maxAp, maxHp, isAlly);
   }
 
-  // plays at the end of deplacement
+  /** Plays at the end of movement. */
   override nextAction(): void {
     this.battleScene.clearAccessibleTiles();
     this.battleScene.refreshAccessibleTiles();

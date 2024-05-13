@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { Unit } from "./Unit";
 import { Spell } from "./Spell";
 
-// non-player characters in battle
+/** Non playable characters in battle. */
 export class Npc extends Unit {
   constructor(
     scene: Phaser.Scene,
@@ -34,8 +34,10 @@ export class Npc extends Unit {
         if (nearestFoe) {
           // if foe already at contact no need to move...
           if (distance === 0) {
+            // ... so we cast spell immediately
             this.castFirstSpellOrEndTurn(nearestFoe);
           } else {
+            // else move towards foe
             pathToNearestFoe = pathToNearestFoe.slice(0, this.mp);
             this.moveAlong(pathToNearestFoe);
             this.once("endOfDeplacementReached", (unit: Unit) => {
@@ -114,8 +116,10 @@ export class Npc extends Unit {
 
   private tryToCastSpell(spell: Spell, targetUnit = null) {
     let targetVec: Phaser.Math.Vector2 = null;
+    // if we already identified a target (like the foe we're going towards), use it
     if (targetUnit && this.isUnitTargetableWithSpell(spell, targetUnit)) {
       targetVec = new Phaser.Math.Vector2(targetUnit.indX, targetUnit.indY);
+      // else locate a possible target for this spell
     } else {
       let x: number, y: number;
       let targetTile = this.locateTarget(spell);
@@ -153,7 +157,7 @@ export class Npc extends Unit {
     );
   }
 
-  // locates an accessible target for a given spell
+  /** Locates an accessible target for a given spell. */
   locateTarget(spell: Spell) {
     return this.battleScene.backgroundLayer?.findTile(
       (tile) =>
@@ -165,7 +169,7 @@ export class Npc extends Unit {
     );
   }
 
-  // return true if the given unit is a foe for this npc
+  /** Returns true if the given unit is in the opposite team of this npc. */
   isFoe(unit: Unit) {
     return this.isAlly ? !unit.isAlly : unit.isAlly;
   }
