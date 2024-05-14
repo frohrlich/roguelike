@@ -88,7 +88,6 @@ export class DeckScene extends Phaser.Scene {
           0,
           0,
           false,
-          false,
           UnitService.units[cardName]
         );
       } else {
@@ -96,7 +95,6 @@ export class DeckScene extends Phaser.Scene {
           this,
           0,
           0,
-          false,
           false,
           DeckService.bonusCardsData[cardName]
         );

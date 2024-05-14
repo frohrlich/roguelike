@@ -175,7 +175,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   // move along a path
   moveAlong(path: Phaser.Math.Vector2[]) {
-    this.battleScene.removeFromObstacleLayer(this);
+    this.battleScene.removeFromObstacleLayer(this.indX, this.indY);
 
     if (!path || path.length <= 0) {
       if (this.isMoving) {
@@ -399,7 +399,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     isAlignedX: boolean,
     isForward: number
   ) {
-    this.battleScene.removeFromObstacleLayer(this);
+    this.battleScene.removeFromObstacleLayer(this.indX, this.indY);
     if (isAlignedX) {
       let deltaX = value * isForward;
       let direction = Math.sign(deltaX);
@@ -807,7 +807,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   }
 
   teleportToPosition(indX: number, indY: number) {
-    this.battleScene.removeFromObstacleLayer(this);
+    this.battleScene.removeFromObstacleLayer(this.indX, this.indY);
     this.indX = indX;
     this.indY = indY;
     this.battleScene.addToObstacleLayer(new Phaser.Math.Vector2(indX, indY));

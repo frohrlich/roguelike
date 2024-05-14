@@ -11,7 +11,7 @@ import { DeckService } from "../services/DeckService";
 import { MapService } from "../services/MapService";
 import { SpellService } from "../services/SpellService";
 
-// Store a tile and the path to it
+/** Store a tile and the path to it (for movement). */
 interface TilePath {
   pos: Phaser.Math.Vector2;
   path: Phaser.Math.Vector2[];
@@ -45,6 +45,7 @@ export class BattleScene extends Phaser.Scene {
   uiScene: BattleUIScene;
   overlays: Phaser.GameObjects.Rectangle[] = [];
   spellAoeOverlay: Phaser.GameObjects.Rectangle[] = [];
+  spellAoeOverlayBasePositions: Phaser.Math.Vector2[] = [];
   pathOverlay: Phaser.GameObjects.Rectangle[] = [];
   enemyType: string;
   grid: Phaser.GameObjects.Grid;
@@ -95,7 +96,7 @@ export class BattleScene extends Phaser.Scene {
     this.addGrid(zoom);
 
     // create the timeline
-    this.timeline = createTimeline(this.allies, this.enemies);
+    this.createTimeline(this.allies, this.enemies);
 
     // clean up event listener on Scene shutdown
     this.events.on(Phaser.Scenes.Events.SHUTDOWN, () => {
@@ -108,7 +109,7 @@ export class BattleScene extends Phaser.Scene {
 
     // and finally, player gets to choose their starter position
     this.displayWholeScreenMessage("Preparation phase", 2000);
-    this.chooseStartPosition();
+    this.setupStartPosition();
   }
 
   applyCardBonuses() {
@@ -150,7 +151,7 @@ export class BattleScene extends Phaser.Scene {
     this.eotBonus = 0;
   }
 
-  // add event listener for spell unselect when clicking outside spell range
+  /** Adds event listener for spell unselect when clicking outside spell range. */
   private addSpellUnselectListener() {
     this.input.on(
       Phaser.Input.Events.POINTER_UP,
@@ -204,7 +205,7 @@ export class BattleScene extends Phaser.Scene {
     this.cameras.main.roundPixels = true;
   }
 
-  chooseStartPosition() {
+  setupStartPosition() {
     const playerColor = 0x0000ff;
     const enemyColor = 0xff0000;
 
@@ -336,7 +337,7 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
-  // play this after player chose starter position and pressed start button
+  /** Play this after player chose starter position and pressed ready button. */
   startBattle() {
     this.isInPreparationPhase = false;
     this.ungrabPreviouslyGrabbedUnit();
@@ -356,7 +357,7 @@ export class BattleScene extends Phaser.Scene {
     firstCharacter.playTurn();
   }
 
-  // end turn after clicking end turn button (for player) or finishing actions (for npcs)
+  /** End turn after clicking end turn button (for player) or finishing actions (for npcs). */
   endTurn = () => {
     this.uiScene.refreshUI();
     // clear previous player highlight on the timeline
@@ -533,7 +534,7 @@ export class BattleScene extends Phaser.Scene {
     if (pathToUnitContact) {
       const targetUnit = this.getUnitAtPos(targetVec.x, targetVec.y);
       if (targetUnit) {
-        this.removeFromObstacleLayer(targetUnit);
+        this.removeFromObstacleLayer(targetUnit.indX, targetUnit.indY);
       }
     }
     const path = findPath(
@@ -555,8 +556,7 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
-  // highlight tiles accessible to the player
-  // and make them interactive
+  /** Highlights tiles accessible to the player and makes them interactive. */
   highlightAccessibleTiles = (positions: TilePath[]) => {
     let baseColor = 0xffffff;
     positions.forEach((tilePos) => {
@@ -615,8 +615,8 @@ export class BattleScene extends Phaser.Scene {
     this.pathOverlay = [];
   }
 
-  // calculate the accessible tiles around a position with a pm radius
-  // also store the path to each tile
+  /** Calculates the accessible tiles around a position with a pm radius.
+   * Also stores the path to each tile. */
   calculateAccessibleTiles = (
     pos: Phaser.Math.Vector2,
     pm: number
@@ -655,7 +655,7 @@ export class BattleScene extends Phaser.Scene {
     return tablePos;
   };
 
-  // refresh the accessible tiles around the player
+  /** Refresh the accessible tiles around the player. */
   refreshAccessibleTiles() {
     this.accessibleTiles = this.calculateAccessibleTiles(
       new Phaser.Math.Vector2(this.currentPlayer.indX, this.currentPlayer.indY),
@@ -663,13 +663,11 @@ export class BattleScene extends Phaser.Scene {
     );
   }
 
-  // clear highlighted tiles
   clearAccessibleTiles = () => {
     this.clearOverlay();
     this.clearPathHighlight();
   };
 
-  // add a unit to the scene
   addUnit(
     unitData: UnitData,
     startX: number,
@@ -834,18 +832,12 @@ export class BattleScene extends Phaser.Scene {
     });
   };
 
-  // update position of Unit as an obstacle for the others
-  updateObstacleLayer(unit: Unit, target: Phaser.Math.Vector2) {
-    this.removeFromObstacleLayer(unit);
-    this.addToObstacleLayer(target);
-  }
-
-  removeFromObstacleLayer(unit: Unit) {
-    this.obstaclesLayer.removeTileAt(unit.indX, unit.indY);
+  removeFromObstacleLayer(indX: number, indY: number) {
+    this.obstaclesLayer.removeTileAt(indX, indY);
   }
 
   removeUnitFromBattle(unit: Unit) {
-    this.removeFromObstacleLayer(unit);
+    this.removeFromObstacleLayer(unit.indX, unit.indY);
     this.removeUnitFromTimeline(unit);
     this.removeUnitFromTeam(unit);
     this.refreshAccessibleTiles();
@@ -898,40 +890,33 @@ export class BattleScene extends Phaser.Scene {
         this.overlays.push(overlay);
         const pos = new Phaser.Math.Vector2(tile.x, tile.y);
 
-        // on clicking on a tile, cast spell
-        overlay.on("pointerup", () => {
-          this.currentPlayer.castSpell(
-            this.currentSpell,
-            pos,
-            this.damageBonus
-          );
-        });
-        //on hovering over a tile, display aoe zone
-        overlay.on("pointerover", () => {
-          this.updateAoeZone(spell, tile.pixelX, tile.pixelY);
-        });
-        overlay.on("pointerout", () => {
-          this.hideAoeZone();
-        });
+        this.activateSpellEvents(overlay, pos, spell, tile);
 
         // we want hover or click on a unit to have the same effect than hover or click on its tile
         const playerOnThisTile = this.getUnitAtPos(tile.x, tile.y);
         if (playerOnThisTile) {
-          playerOnThisTile.on("pointerup", () => {
-            this.currentPlayer.castSpell(
-              this.currentSpell,
-              pos,
-              this.damageBonus
-            );
-          });
-          playerOnThisTile.on("pointerover", () => {
-            this.updateAoeZone(spell, tile.pixelX, tile.pixelY);
-          });
-          playerOnThisTile.on("pointerout", () => {
-            this.hideAoeZone();
-          });
+          this.activateSpellEvents(playerOnThisTile, pos, spell, tile);
         }
       }
+    });
+  }
+
+  private activateSpellEvents(
+    object: Phaser.GameObjects.GameObject,
+    pos: Phaser.Math.Vector2,
+    spell: Spell,
+    tile: Phaser.Tilemaps.Tile
+  ) {
+    // on clicking on a tile, cast spell
+    object.on("pointerup", () => {
+      this.currentPlayer.castSpell(this.currentSpell, pos, this.damageBonus);
+    });
+    // on hovering over a tile, display aoe zone
+    object.on("pointerover", () => {
+      this.updateAoeZone(spell, tile.pixelX, tile.pixelY);
+    });
+    object.on("pointerout", () => {
+      this.hideAoeZone();
     });
   }
 
@@ -941,7 +926,7 @@ export class BattleScene extends Phaser.Scene {
     });
   }
 
-  // create aoe zone but doesn't display it yet
+  /** Creates aoe zone but doesn't display it yet. */
   createAoeZone(spell: Spell) {
     const highlightColor = 0xff0099;
     const alpha = 0.6;
@@ -965,8 +950,8 @@ export class BattleScene extends Phaser.Scene {
             let distance = Math.abs(i) + Math.abs(j);
             if (distance <= spell.aoeSize) {
               const overlay = this.add.rectangle(
-                0,
-                0,
+                (i + 0.5) * this.tileWidth,
+                (j + 0.5) * this.tileHeight,
                 this.tileWidth,
                 this.tileHeight,
                 highlightColor,
@@ -974,6 +959,9 @@ export class BattleScene extends Phaser.Scene {
               );
               overlay.setVisible(false);
               this.spellAoeOverlay.push(overlay);
+              this.spellAoeOverlayBasePositions.push(
+                new Phaser.Math.Vector2(overlay.x, overlay.y)
+              );
             }
           }
         }
@@ -998,7 +986,7 @@ export class BattleScene extends Phaser.Scene {
     }
   }
 
-  // update the position of the aoe zone, when player hovers over tile
+  /** Updates the position of the aoe zone, when player hovers over tile. */
   updateAoeZone(spell: Spell, x: number, y: number) {
     switch (spell.aoe) {
       case "monoTarget":
@@ -1008,34 +996,17 @@ export class BattleScene extends Phaser.Scene {
         overlay.setVisible(true);
         break;
       case "star":
-        // for the 'star' aoe, we iterate over the tiles within the 'aoeSize' distance from target
-        let target = this.backgroundLayer.worldToTileXY(x, y);
-        let k = 0;
-        for (
-          let i = target.x - spell.aoeSize;
-          i <= target.x + spell.aoeSize;
-          i++
-        ) {
-          for (
-            let j = target.y - spell.aoeSize;
-            j <= target.y + spell.aoeSize;
-            j++
-          ) {
-            let distance = Math.abs(target.x - i) + Math.abs(target.y - j);
-            if (distance <= spell.aoeSize) {
-              let pos = this.backgroundLayer.tileToWorldXY(i, j);
-              const overlay = this.spellAoeOverlay[k];
-              overlay.x = pos.x + 0.5 * this.tileWidth;
-              overlay.y = pos.y + 0.5 * this.tileWidth;
-              overlay.setVisible(true);
-              k++;
-            }
-          }
+        for (let i = 0; i < this.spellAoeOverlay.length; i++) {
+          const overlay = this.spellAoeOverlay[i];
+          const basePosition = this.spellAoeOverlayBasePositions[i];
+          overlay.x = basePosition.x + x;
+          overlay.y = basePosition.y + y;
+          overlay.setVisible(true);
         }
         break;
       case "line":
         // this aoe should only be used with spells cast in a straight line
-        target = this.backgroundLayer.worldToTileXY(x, y);
+        const target = this.backgroundLayer!.worldToTileXY(x, y);
         // true if target is aligned horizontally with player (else we assume it's aligned vertically)
         let isAlignedX = target.y == this.currentPlayer.indY;
         const baseIndex = isAlignedX ? target.x : target.y;
@@ -1045,11 +1016,11 @@ export class BattleScene extends Phaser.Scene {
         for (let i = 0; i < spell.aoeSize; i++) {
           const overlay = this.spellAoeOverlay[i];
           let pos = isAlignedX
-            ? this.backgroundLayer.tileToWorldXY(
+            ? this.backgroundLayer!.tileToWorldXY(
                 baseIndex + i * isForward,
                 target.y
               )
-            : this.backgroundLayer.tileToWorldXY(
+            : this.backgroundLayer!.tileToWorldXY(
                 target.x,
                 baseIndex + i * isForward
               );
@@ -1069,14 +1040,15 @@ export class BattleScene extends Phaser.Scene {
       spellAoe.destroy(true);
     });
     this.spellAoeOverlay = [];
+    this.spellAoeOverlayBasePositions = [];
   }
 
   getUnitsInsideAoe(caster: Unit, indX: number, indY: number, spell: Spell) {
-    let units: Unit[] = [];
+    let unitsInAoe: Unit[] = [];
     switch (spell.aoe) {
       case "monoTarget":
         if (this.isUnitThere(indX, indY)) {
-          units.push(this.getUnitAtPos(indX, indY));
+          unitsInAoe.push(this.getUnitAtPos(indX, indY));
         }
         break;
       case "star":
@@ -1085,7 +1057,7 @@ export class BattleScene extends Phaser.Scene {
             let distance = Math.abs(indX - i) + Math.abs(indY - j);
             if (distance <= spell.aoeSize) {
               if (this.isUnitThere(i, j)) {
-                units.push(this.getUnitAtPos(i, j));
+                unitsInAoe.push(this.getUnitAtPos(i, j));
               }
             }
           }
@@ -1111,7 +1083,7 @@ export class BattleScene extends Phaser.Scene {
                 y: baseIndex + i * isForward,
               };
           if (this.isUnitThere(pos.x, pos.y)) {
-            units.push(this.getUnitAtPos(pos.x, pos.y));
+            unitsInAoe.push(this.getUnitAtPos(pos.x, pos.y));
           }
         }
         break;
@@ -1119,10 +1091,9 @@ export class BattleScene extends Phaser.Scene {
       default:
         break;
     }
-    return units;
+    return unitsInAoe;
   }
 
-  // calculate spell range
   calculateSpellRange(unit: Unit, spell: Spell) {
     let bonusRange = 0;
     // add bonus range to ranged spells only
@@ -1182,7 +1153,6 @@ export class BattleScene extends Phaser.Scene {
     return false;
   }
 
-  // return true if there is a unit at the specified position
   isUnitThere(x: number, y: number): boolean {
     return this.timeline.some((unit) => unit.indX == x && unit.indY == y);
   }
@@ -1248,6 +1218,11 @@ export class BattleScene extends Phaser.Scene {
       overlay.destroy(true);
     });
     this.overlays = [];
+    this.clearAllTilesTint();
+  }
+
+  clearAllTilesTint() {
+    this.backgroundLayer?.forEachTile((tile) => (tile.tint = 0xffffff));
   }
 
   gameOver() {
@@ -1320,19 +1295,19 @@ export class BattleScene extends Phaser.Scene {
       Math.abs(unitA.indX - unitB.indX) + Math.abs(unitA.indY - unitB.indY)
     );
   }
-}
 
-// play order : alternate between allies and enemies
-let createTimeline = (allies: Unit[], enemies: Unit[]) => {
-  const maxSize = Math.max(allies.length, enemies.length);
-  let timeline: Unit[] = [];
-  for (let i = 0; i < maxSize; i++) {
-    if (allies.length > i) {
-      timeline.push(allies[i]);
+  /** Play order : alternate between allies and enemies. */
+  createTimeline(allies: Unit[], enemies: Unit[]) {
+    const maxSize = Math.max(allies.length, enemies.length);
+    const timeline: Unit[] = [];
+    for (let i = 0; i < maxSize; i++) {
+      if (allies.length > i) {
+        timeline.push(allies[i]);
+      }
+      if (enemies.length > i) {
+        timeline.push(enemies[i]);
+      }
     }
-    if (enemies.length > i) {
-      timeline.push(enemies[i]);
-    }
+    this.timeline = timeline;
   }
-  return timeline;
-};
+}

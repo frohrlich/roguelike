@@ -12,11 +12,10 @@ export class BonusCard extends Card {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    isOnRight: boolean,
     isInChooseCardScene: boolean,
     bonusData: BonusData
   ) {
-    super(scene, x, y, isOnRight, isInChooseCardScene);
+    super(scene, x, y, isInChooseCardScene);
     this.bonusData = bonusData;
     this.descriptionText = bonusData.description;
     this.onCardDescriptionText = bonusData.onCardDescription;

@@ -137,6 +137,7 @@ export class ChooseCardScene extends Phaser.Scene {
     }
   }
 
+  /** The card overlay is over the whole scene so that click anywhere unselects currently selected card. */
   private toggleUnselectCardOverlay(card: Card) {
     if (!this.unselectCardOverlay) {
       this.unselectCardOverlay = this.add
@@ -260,7 +261,6 @@ export class ChooseCardScene extends Phaser.Scene {
       this,
       0,
       this.game.scale.height / 2,
-      false,
       true,
       this.remainingCharacterCards[characterType]
     );
@@ -276,7 +276,6 @@ export class ChooseCardScene extends Phaser.Scene {
       this,
       0,
       this.game.scale.height / 2,
-      false,
       true,
       this.remainingBonusCards[bonusCardType]
     );

@@ -96,74 +96,59 @@ export class UISpell extends UIElement {
 
   /** Defines spell info text and draws it. */
   addInfoText() {
-    const scale = this.myScene.uiScale;
     const infoOffset = this.icon.displayWidth / 2;
     const lineHeight = this.fontSize + 1;
-    const fontSize = this.fontSize;
-    let text = "";
 
     // spell name text in bold
     let spellNameText = `${this.spell.name}`;
     // spell cost
-    let addText = `\ncost: ${this.spell.cost} AP`;
-    text += addText;
+    let text = `\ncost: ${this.spell.cost} AP`;
     // spell range
-    // addText = `\n${this.spell.minRange}-${this.spell.maxRange} range`;
-    // text += addText;
+    text += `\n${this.spell.minRange}-${this.spell.maxRange} range`;
     // spell max cooldown
     // if (this.spell.maxCooldown > 0) {
-    //   addText = `\ncooldown: ${this.spell.maxCooldown}`;
-    //   text += addText;
+    //   text += `\ncooldown: ${this.spell.maxCooldown}`;
     // }
     // spell damage
     if (this.spell.damage > 0) {
-      addText = `\n-${this.getCalculatedDamage(this.spell)} HP`;
-      text += addText;
+      text += `\n-${this.getCalculatedDamage(this.spell)} HP`;
     }
     // spell heal
     if (this.spell.heal > 0) {
-      addText = `\n+${this.spell.heal} HP`;
-      text += addText;
+      text += `\n+${this.spell.heal} HP`;
     }
     // spell malus AP
     if (this.spell.malusAP > 0) {
-      addText = `\n-${this.spell.malusAP} AP`;
-      text += addText;
+      text += `\n-${this.spell.malusAP} AP`;
     }
     // spell bonus AP
     if (this.spell.bonusAP > 0) {
-      addText = `\n+${this.spell.bonusAP} AP`;
-      text += addText;
+      text += `\n+${this.spell.bonusAP} AP`;
     }
     // spell malus MP
     if (this.spell.malusMP > 0) {
-      addText = `\n-${this.spell.malusMP} MP`;
-      text += addText;
+      text += `\n-${this.spell.malusMP} MP`;
     }
     // spell bonus MP
     if (this.spell.bonusMP > 0) {
-      addText = `\n+${this.spell.bonusMP} MP`;
-      text += addText;
+      text += `\n+${this.spell.bonusMP} MP`;
     }
     // spell effect over time
     if (this.spell.effectOverTime) {
-      addText = `\neffect : ${this.spell.effectOverTime.name}(${this.spell.effectOverTime.duration})`;
-      text += addText;
+      text += `\neffect : ${this.spell.effectOverTime.name}(${this.spell.effectOverTime.duration})`;
     }
     // spell summoned unit
     if (this.spell.summons) {
-      addText = `\nsummons : ${this.spell.summons.type}`;
-      text += addText;
+      text += `\nsummons : ${this.spell.summons.type}`;
     }
     // spell push/pull
     if (this.spell.moveTargetBy) {
       const pushOrPull = this.spell.moveTargetBy > 0 ? "push" : "pull";
-      addText = `\n${pushOrPull} (${Math.abs(this.spell.moveTargetBy)})`;
-      text += addText;
+      text += `\n${pushOrPull} (${Math.abs(this.spell.moveTargetBy)})`;
     }
 
-    this.displayInfoText(spellNameText, fontSize, text);
-    this.displayInfoTextOutline(infoOffset, scale, lineHeight);
+    this.displayInfoText(spellNameText, this.fontSize, text);
+    this.displayInfoTextOutline(infoOffset, this.myScene.uiScale, lineHeight);
   }
 
   private displayInfoText(
@@ -289,7 +274,8 @@ export class UISpell extends UIElement {
   }
 
   createSpellCooldown() {
-    if (this.spellCooldown) this.spellCooldown.destroy();
+    this.spellCooldown?.destroy();
+
     this.spellCooldown = this.myScene.add.bitmapText(
       this.icon.x,
       this.icon.y + 2,

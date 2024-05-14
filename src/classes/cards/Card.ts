@@ -10,8 +10,6 @@ export class Card extends Phaser.GameObjects.Container {
   fontSize = 16;
   caracFontSize = 32;
 
-  // if card on right of screen, character description will go to the left
-  isOnRight: boolean;
   isInChooseCardScene: boolean;
   descriptionText: string;
   name: string;
@@ -21,17 +19,13 @@ export class Card extends Phaser.GameObjects.Container {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    isOnRight: boolean,
     isInChooseCardScene: boolean
   ) {
     super(scene, x, y);
 
-    this.isOnRight = isOnRight;
     this.isInChooseCardScene = isInChooseCardScene;
     this.makeCardOutline();
 
-    // uncomment this if you want character description to appear alongside card
-    // this.makeDescription();
     this.setSize(this.cardWidth, this.cardHeight);
     if (isInChooseCardScene) {
       this.setInteractive();
@@ -54,41 +48,6 @@ export class Card extends Phaser.GameObjects.Container {
         ? 0xffffff
         : this.illustrationTint
     );
-  }
-
-  makeDescription() {
-    const descriptionMargin = 2;
-    const descriptionText = new Phaser.GameObjects.BitmapText(
-      this.scene,
-      this.cardWidth / 2 + this.outlineWidth + descriptionMargin,
-      0,
-      "dogicapixel",
-      this.descriptionText,
-      this.fontSize
-    )
-      .setVisible(false)
-      .setName("toggle");
-    if (this.isOnRight) {
-      descriptionText.x = -descriptionText.x - descriptionText.displayWidth;
-    }
-    // text
-    this.add(descriptionText);
-    const descriptionOutline = new Phaser.GameObjects.Rectangle(
-      this.scene,
-      descriptionText.x - descriptionMargin,
-      descriptionText.y - descriptionMargin,
-      descriptionText.displayWidth + descriptionMargin * 2,
-      descriptionText.displayHeight + descriptionMargin * 2,
-      0,
-      0.7
-    )
-      .setStrokeStyle(1, this.outlineColor)
-      .setOrigin(0, 0)
-      .setVisible(false)
-      .setName("toggle");
-    // outline
-    this.add(descriptionOutline);
-    this.sendToBack(descriptionOutline);
   }
 
   makeName(name: string) {

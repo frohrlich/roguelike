@@ -49,7 +49,7 @@ export class BattleUIScene extends Phaser.Scene {
     this.createStartButton();
     this.addDeckButton();
     this.updateTimeline(this.battleScene.timeline, true);
-    const spellTitle = new UIText(this, 1, 0, "Spells");
+    new UIText(this, 1, 0, "Spells");
   }
 
   disableSpells(isDisabled: boolean) {
@@ -144,7 +144,7 @@ export class BattleUIScene extends Phaser.Scene {
     const handleWidth = this.uiScale * 6;
     const unitHeight = timeline[0].height;
     const unitWidth = timeline[0].width;
-    // first we get the handle current position if it's already initialized
+    // we get the handle current position if it's already initialized
     let offsetX = 0;
     let offsetY = 0;
     if (this.handle) {
@@ -303,14 +303,6 @@ export class BattleUIScene extends Phaser.Scene {
       uiSpell.refresh();
     });
     this.unitStats?.refresh();
-  }
-
-  refreshUIAfterSpell(spell: Spell) {
-    this.uiSpells.forEach((uiSpell) => {
-      // replace local spell with one from server, to update cooldown
-      if (uiSpell.spell.name === spell.name) uiSpell.spell = spell;
-      uiSpell.refresh();
-    });
   }
 
   /** Displays unit spells on the spell slots of the UI. */

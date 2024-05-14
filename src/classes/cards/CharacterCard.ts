@@ -11,11 +11,10 @@ export class CharacterCard extends Card {
     scene: Phaser.Scene,
     x: number,
     y: number,
-    isOnRight: boolean,
     isInChooseCardScene: boolean,
     unitData: UnitData
   ) {
-    super(scene, x, y, isOnRight, isInChooseCardScene);
+    super(scene, x, y, isInChooseCardScene);
     this.unitData = unitData;
     this.descriptionText = unitData.description;
     this.name = unitData.type;
