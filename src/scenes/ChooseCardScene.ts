@@ -88,7 +88,7 @@ export class ChooseCardScene extends Phaser.Scene {
       this.chooseText.x,
       legendTopMargin,
       "dogicapixel",
-      "Movement points",
+      "Movement points (MP)",
       16
     );
     // HP
@@ -97,7 +97,7 @@ export class ChooseCardScene extends Phaser.Scene {
         this.chooseText.x,
         MPLegend.getBottomLeft().y,
         "dogicapixel",
-        "Health points",
+        "Health points (HP)",
         16
       )
       .setTint(0xff0000);
@@ -107,7 +107,7 @@ export class ChooseCardScene extends Phaser.Scene {
         this.chooseText.x,
         HPLegend.getBottomLeft().y,
         "dogicapixel",
-        "Action points",
+        "Action points (AP)",
         16
       )
       .setTint(0x33c6f7);

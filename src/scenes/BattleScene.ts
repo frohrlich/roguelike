@@ -19,7 +19,6 @@ interface TilePath {
 
 export class BattleScene extends Phaser.Scene {
   animFramerate = 5;
-  enemyCount = 2; // enemies per battle
   static mapsCount = 3; // different battle maps per zone
 
   static mapNumbers: number[] = [];
@@ -408,8 +407,8 @@ export class BattleScene extends Phaser.Scene {
       }
     });
 
-    // enemy
-    for (let i = 0; i < this.enemyCount; i++) {
+    // 1 more enemy per position progression inside a zone
+    for (let i = 0; i <= MapService.position; i++) {
       const enemyData = UnitService.units[data.enemyType];
       let x: number, y: number;
       do {

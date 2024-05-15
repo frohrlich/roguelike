@@ -157,7 +157,7 @@ export class SpellService {
       "Sting",
       true,
       false,
-      15,
+      150,
       0,
       1,
       0,
