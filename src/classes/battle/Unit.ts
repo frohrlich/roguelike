@@ -54,8 +54,8 @@ export class Unit extends Phaser.GameObjects.Sprite {
   identifier: Phaser.GameObjects.Image;
   spells: Spell[] = [];
   timelineSlot: UITimelineSlot;
-  effectOverTime: EffectOverTime = null;
-  effectIcon: Phaser.GameObjects.Image;
+  effectsOverTime: EffectOverTime[] = [];
+  effectIcons: Phaser.GameObjects.Container;
   summonedUnits: Unit[] = [];
   isSelected: boolean;
   isGrabbed = false;
@@ -152,7 +152,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       this.timelineSlot.tint = this.selectedTint;
     }
     if (!this.battleScene.isInPreparationPhase) this.healthBar.setVisible(true);
-    if (this.effectIcon) this.effectIcon.setVisible(true);
+    this.effectIcons?.setVisible(true);
     this.battleScene.uiScene.changeStatsUnit(this);
   }
 
@@ -163,7 +163,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       this.timelineSlot.tint = 0xffffff;
     }
     this.healthBar.setVisible(false);
-    if (this.effectIcon) this.effectIcon.setVisible(false);
+    this.effectIcons?.setVisible(false);
     this.battleScene.uiScene.changeStatsUnit(this.battleScene.currentPlayer);
   }
 
@@ -240,7 +240,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   private moveUnitAttributes() {
     this.moveHealthBarToPlayerPosition();
     this.moveTeamIdentifier();
-    if (this.effectIcon) this.moveEffectIconToPlayerPosition();
+    if (this.effectIcons) this.moveEffectIconsToPlayerPosition();
   }
 
   moveTeamIdentifier() {
@@ -286,7 +286,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   playTurn() {
     this.identifier.tint = 0xffffff;
-    this.undergoEffectOverTime();
+    this.undergoEffectsOverTime();
   }
 
   nextAction() {}
@@ -466,43 +466,62 @@ export class Unit extends Phaser.GameObjects.Sprite {
     );
   }
 
-  undergoEffectOverTime() {
-    const eot = this.effectOverTime;
-    if (eot && eot.duration > 0) {
-      // damage multiplier on enemies only
-      const eotDamageMultiplier = this.isAlly ? 0 : this.battleScene.eotBonus;
-      const damage = eot.damage * (1 + eotDamageMultiplier * 0.01);
+  undergoEffectsOverTime() {
+    let damage = 0;
+    let heal = 0;
+    let malusAP = 0;
+    let bonusAP = 0;
+    let malusMP = 0;
+    let bonusMP = 0;
+    for (let i = 0; i < this.effectsOverTime.length; i++) {
+      const eot = this.effectsOverTime[i];
+      if (eot && eot.duration > 0) {
+        // damage multiplier on enemies only
+        const eotDamageMultiplier = this.isAlly ? 0 : this.battleScene.eotBonus;
+        const calculatedDamage = eot.damage * (1 + eotDamageMultiplier * 0.01);
 
-      this.hp -= damage;
-      // no healing over max hp
-      this.hp += eot.heal;
-      this.ap -= eot.malusAP;
-      this.ap += eot.bonusAP;
-      this.mp -= eot.malusMP;
-      this.mp += eot.bonusMP;
+        damage += calculatedDamage;
+        heal += eot.heal;
+        malusAP += eot.malusAP;
+        bonusAP += eot.bonusAP;
+        malusMP += eot.malusMP;
+        bonusMP += eot.bonusMP;
 
-      this.hp = Math.max(this.hp, 0);
-      this.hp = Math.min(this.hp, this.maxHp);
-      this.mp = Math.max(this.mp, 0);
-      this.ap = Math.max(this.ap, 0);
+        eot.duration--;
 
-      this.updateHealthBar();
-      eot.duration--;
-      this.displaySpellOrEffectOverTimeEffects(
-        damage,
-        eot.malusMP,
-        eot.malusAP,
-        eot.heal,
-        eot.bonusMP,
-        eot.bonusAP
-      );
-      this.refreshUI();
-      if (eot.duration <= 0) {
-        this.effectOverTime = null;
-        this.effectIcon.destroy();
+        if (eot.duration <= 0) {
+          this.effectsOverTime.splice(i, 1);
+          i--;
+        }
       }
-      this.checkDead();
     }
+
+    this.updateEffectOverTimeIcons();
+
+    this.hp -= damage;
+    this.hp += heal;
+    this.ap -= malusAP;
+    this.ap += bonusAP;
+    this.mp -= malusMP;
+    this.mp += bonusMP;
+
+    this.hp = Math.max(this.hp, 0);
+    this.hp = Math.min(this.hp, this.maxHp);
+    this.mp = Math.max(this.mp, 0);
+    this.ap = Math.max(this.ap, 0);
+
+    this.displaySpellOrEffectOverTimeEffects(
+      damage,
+      malusMP,
+      malusAP,
+      heal,
+      bonusMP,
+      bonusAP
+    );
+
+    this.updateHealthBar();
+    this.refreshUI();
+    this.checkDead();
   }
 
   displaySpellOrEffectOverTimeEffects(
@@ -650,7 +669,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.healthBar.destroy();
     this.identifier.destroy();
     this.timelineSlot.destroy();
-    if (this.effectIcon) this.effectIcon.destroy();
+    this.effectIcons?.destroy();
     this.destroy();
   }
 
@@ -780,24 +799,44 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   addEffectOverTime(effectOverTime: EffectOverTime) {
     if (effectOverTime) {
-      this.effectOverTime = { ...effectOverTime };
-      if (this.effectIcon) this.effectIcon.destroy();
-      this.makeEffectOverTimeIcon(effectOverTime);
+      // if this effect is already applied on the unit, we just reset the duration
+      // (effects of the same kind don't stack)
+      const alreadyExistingEffect = this.effectsOverTime.find(
+        (eot) => eot.name === effectOverTime.name
+      );
+      if (alreadyExistingEffect) {
+        alreadyExistingEffect.duration = effectOverTime.duration;
+      } else {
+        this.effectsOverTime.push({ ...effectOverTime });
+      }
+      this.updateEffectOverTimeIcons();
     }
   }
 
-  makeEffectOverTimeIcon(effectOverTime: EffectOverTime) {
-    this.effectIcon = this.scene.add
-      .image(0, 0, "player", effectOverTime.frame)
-      .setScale(1)
-      .setDepth(9999);
-    if (!this.isSelected) this.effectIcon.setVisible(false);
-    this.moveEffectIconToPlayerPosition();
+  updateEffectOverTimeIcons() {
+    this.effectIcons?.destroy();
+    this.effectIcons = this.scene.add.container().setDepth(9999);
+    const eotMargin = 2;
+    for (let i = 0; i < this.effectsOverTime.length; i++) {
+      const effectOverTime = this.effectsOverTime[i];
+      this.effectIcons.add(
+        new Phaser.GameObjects.Image(
+          this.battleScene,
+          (this.battleScene.tileWidth + eotMargin) *
+            (i + 0.5 * (1 - this.effectsOverTime.length)),
+          0,
+          "player",
+          effectOverTime.frame
+        )
+      );
+    }
+    if (!this.isSelected) this.effectIcons.setVisible(false);
+    this.moveEffectIconsToPlayerPosition();
   }
 
-  moveEffectIconToPlayerPosition() {
-    this.effectIcon.x = this.x;
-    this.effectIcon.y = this.isOnTop()
+  moveEffectIconsToPlayerPosition() {
+    this.effectIcons.x = this.x;
+    this.effectIcons.y = this.isOnTop()
       ? this.y + this.effectIconUnderUnitOffset
       : this.y - this.displayHeight - this.effectIconOverUnitOffset;
   }
