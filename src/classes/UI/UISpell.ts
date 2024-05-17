@@ -111,11 +111,11 @@ export class UISpell extends UIElement {
     // }
     // spell damage
     if (this.spell.damage > 0) {
-      text += `\n-${this.getCalculatedDamage(this.spell)} HP`;
+      text += `\ndamage : ${this.getCalculatedDamage(this.spell)}`;
     }
     // spell heal
     if (this.spell.heal > 0) {
-      text += `\n+${this.spell.heal} HP`;
+      text += `\nheal : ${this.spell.heal}`;
     }
     // spell malus AP
     if (this.spell.malusAP > 0) {

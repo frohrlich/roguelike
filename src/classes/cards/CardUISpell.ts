@@ -81,11 +81,11 @@ export class CardUISpell extends Phaser.GameObjects.Container {
     // }
     // spell damage
     if (this.spell.damage > 0) {
-      text += `\n-${this.spell.damage} HP`;
+      text += `\ndamage : ${this.spell.damage}`;
     }
     // spell heal
     if (this.spell.heal > 0) {
-      text += `\n+${this.spell.heal} HP`;
+      text += `\nheal : ${this.spell.heal}`;
     }
     // spell malus AP
     if (this.spell.malusAP > 0) {

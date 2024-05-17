@@ -325,18 +325,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
       spell
     );
     affectedUnits.forEach((unit) => {
+      unit.off("spellDisplayFinished");
       unit.undergoSpell(spell, bonusDamage);
+      // for spells that push or pull
       if (!unit.isDead() && spell.moveTargetBy) {
-        // check alignment for spells that push or pull
-        const isAlignedX = targetVec.y == this.indY;
-        const isForward = isAlignedX
-          ? Math.sign(targetVec.x - this.indX)
-          : Math.sign(targetVec.y - this.indY);
-        unit.moveDirectlyToNewPosition(
-          spell.moveTargetBy,
-          isAlignedX,
-          isForward
-        );
+        this.moveUnitBySpell(targetVec, unit, spell);
         if (this.battleScene.currentPlayer) {
           this.battleScene.refreshAccessibleTiles();
         }
@@ -361,6 +354,18 @@ export class Unit extends Phaser.GameObjects.Sprite {
       this.summonedUnits.push(summonedUnit);
     }
     this.refreshUI();
+  }
+
+  private moveUnitBySpell(
+    targetVec: Phaser.Math.Vector2,
+    unit: Unit,
+    spell: Spell
+  ) {
+    const isAlignedX = targetVec.y === this.indY;
+    const isForward = isAlignedX
+      ? Math.sign(targetVec.x - this.indX)
+      : Math.sign(targetVec.y - this.indY);
+    unit.moveDirectlyToNewPosition(spell.moveTargetBy, isAlignedX, isForward);
   }
 
   undergoSpell(spell: Spell, bonusDamage: number = 0) {
@@ -399,6 +404,9 @@ export class Unit extends Phaser.GameObjects.Sprite {
     isAlignedX: boolean,
     isForward: number
   ) {
+    // represents the remaining tiles you ought to be pushed/pull through if there weren't an obstacle
+    // we use it to calculate the push/pull damage
+    let remainingValue = 0;
     this.battleScene.removeFromObstacleLayer(this.indX, this.indY);
     if (isAlignedX) {
       let deltaX = value * isForward;
@@ -415,6 +423,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
           break;
         }
       }
+      remainingValue = Math.abs(value - deltaX);
       if (deltaX) {
         this.battleScene.tweens.add({
           targets: this,
@@ -423,11 +432,20 @@ export class Unit extends Phaser.GameObjects.Sprite {
           onUpdate: () => {
             this.moveUnitAttributes();
           },
+          onComplete: () => {
+            this.endPushMovement(remainingValue);
+          },
           duration: 66 * Math.abs(deltaX),
           repeat: 0,
           yoyo: false,
         });
         this.indX += deltaX;
+      } else {
+        // if we're directly against obstacle, wait till spell damage animation has ended
+        // to show push/pull damage
+        this.once("spellDisplayFinished", () => {
+          this.endPushMovement(remainingValue);
+        });
       }
     } else {
       let deltaY = value * isForward;
@@ -444,6 +462,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
           break;
         }
       }
+      remainingValue = Math.abs(value - deltaY);
       if (deltaY) {
         this.battleScene.tweens.add({
           targets: this,
@@ -453,17 +472,44 @@ export class Unit extends Phaser.GameObjects.Sprite {
             this.moveUnitAttributes();
             this.depth = this.y;
           },
+          onComplete: () => {
+            this.endPushMovement(remainingValue);
+          },
           duration: 66 * Math.abs(deltaY),
           repeat: 0,
           yoyo: false,
         });
         this.indY += deltaY;
+      } else {
+        // if we're directly against obstacle, wait till spell damage animation has ended
+        // to show push/pull damage
+        this.once("spellDisplayFinished", () => {
+          this.endPushMovement(remainingValue);
+        });
       }
     }
+  }
+
+  private endPushMovement(remainingValue: number) {
     this.moveUnitAttributes();
-    this.battleScene.addToObstacleLayer(
-      new Phaser.Math.Vector2(this.indX, this.indY)
-    );
+    this.receivePushDamage(remainingValue);
+    if (!this.isDead()) {
+      this.battleScene.addToObstacleLayer(
+        new Phaser.Math.Vector2(this.indX, this.indY)
+      );
+    }
+  }
+
+  receivePushDamage(value: number) {
+    const pushDamageMultiplier = 5;
+    const damage = value * pushDamageMultiplier;
+    this.hp = Math.max(this.hp - damage, 0);
+
+    this.displaySpellOrEffectOverTimeEffects(damage, 0, 0, 0, 0, 0);
+
+    this.updateHealthBar();
+    this.refreshUI();
+    this.checkDead();
   }
 
   undergoEffectsOverTime() {
@@ -571,6 +617,11 @@ export class Unit extends Phaser.GameObjects.Sprite {
         return;
       }
     }
+    // this event is used for delayed push damage display when already against obstacle
+    // so that regular damage and push damage are not displayed simultaneously
+    this.scene.time.delayedCall(delayBetweenEffects * effects.length, () => {
+      this.emit("spellDisplayFinished");
+    });
   }
 
   displayEffect(
