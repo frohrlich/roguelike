@@ -102,6 +102,7 @@ export class UnitService {
   };
 
   static remainingUnits: { [key: string]: UnitData } = Object.fromEntries(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     Object.entries(this.units).filter(([key, value]) => value.isPlayable)
   );
 }

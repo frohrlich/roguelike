@@ -1,6 +1,5 @@
 import Phaser from "phaser";
 import { GAME_WIDTH, GAME_HEIGHT } from "../app";
-import { BattleScene } from "./BattleScene";
 
 export class BootScene extends Phaser.Scene {
   constructor() {
@@ -33,9 +32,9 @@ export class BootScene extends Phaser.Scene {
         30
       );
     });
-    this.load.on("fileprogress", function (file) {
-      // console.log(`Loading : ${file.src}`);
-    });
+    // this.load.on("fileprogress", function (file) {
+    //   console.log(`Loading : ${file.src}`);
+    // });
     this.load.on("complete", function () {
       progressBar.destroy();
       progressBox.destroy();

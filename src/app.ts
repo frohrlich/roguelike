@@ -75,5 +75,6 @@ window.onload = () => {
   fullscreenButton.hidden = true;
   fullscreenButtonDiv.style.display = "none";
 
-  var game = new RpgGame(config);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const game = new RpgGame(config);
 };

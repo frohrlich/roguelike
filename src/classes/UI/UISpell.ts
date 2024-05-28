@@ -100,7 +100,7 @@ export class UISpell extends UIElement {
     const lineHeight = this.fontSize + 1;
 
     // spell name text in bold
-    let spellNameText = `${this.spell.name}`;
+    const spellNameText = `${this.spell.name}`;
     // spell cost
     let text = `\ncost: ${this.spell.cost} AP`;
     // spell range

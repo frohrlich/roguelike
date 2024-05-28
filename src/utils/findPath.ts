@@ -115,7 +115,7 @@ const findPath = (
   const path: Phaser.Math.Vector2[] = [];
 
   let currentKey = targetKey;
-  let parent = parentForKey[targetKey];
+  const parent = parentForKey[targetKey];
   if (parent === undefined) return null;
   let currentPos = parent.position;
 
@@ -128,7 +128,7 @@ const findPath = (
     currentPos = position;
   }
 
-  let pathReturn = path.reverse();
+  const pathReturn = path.reverse();
   pathReturn.pop();
   pathReturn.push(target);
   return pathReturn;

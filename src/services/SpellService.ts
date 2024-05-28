@@ -1,6 +1,5 @@
 import { EffectOverTime } from "../classes/battle/EffectOverTime";
 import { Spell } from "../classes/battle/Spell";
-import { UnitService } from "./UnitService";
 
 /** This service contains the data for all available spells in the game. */
 export class SpellService {
@@ -409,7 +408,7 @@ export class SpellService {
 
   /** Transforms a list of spell names in a string into an array of Spell objects. */
   static decodeSpellString = (spellStr: string) => {
-    let spellArray: Spell[] = [];
+    const spellArray: Spell[] = [];
     spellStr.split(", ").forEach((spellName) => {
       spellArray.push(this.spells[spellName]);
     });

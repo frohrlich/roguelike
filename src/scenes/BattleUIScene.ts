@@ -85,7 +85,7 @@ export class BattleUIScene extends Phaser.Scene {
       .rectangle(xPos, yPos, this.uiTabWidth * 0.85, this.uiTabHeight * 0.56)
       .setStrokeStyle(2, 0xcccccc)
       .setInteractive();
-    let fontSize = this.buttonTextFontSize;
+    const fontSize = this.buttonTextFontSize;
     this.startButtonText = this.add
       .bitmapText(
         xPos,
@@ -172,7 +172,7 @@ export class BattleUIScene extends Phaser.Scene {
     for (let i = 0; i < timeline.length; i++) {
       const unit = timeline[i];
       // each slot represents a tiny unit portrait in the timeline
-      let slot = new UITimelineSlot(
+      const slot = new UITimelineSlot(
         this,
         offsetX +
           handleWidth +
@@ -192,7 +192,7 @@ export class BattleUIScene extends Phaser.Scene {
         slot.unit.unselectUnit();
       });
       // add background color to identify team
-      let background = this.add.rectangle(
+      const background = this.add.rectangle(
         offsetX +
           handleWidth +
           leftMargin +
@@ -232,7 +232,7 @@ export class BattleUIScene extends Phaser.Scene {
         for (let i = 0; i < this.uiTimeline.length; i++) {
           const slot = this.uiTimeline[i];
           const background = this.uiTimelineBackgrounds[i];
-          let posX =
+          const posX =
             (i + 0.5) * unitWidth * this.uiScale + handleWidth / 2 + dragX;
           slot.setPosition(posX, dragY);
           background.setPosition(posX, dragY);

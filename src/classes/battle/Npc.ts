@@ -29,6 +29,7 @@ export class Npc extends Unit {
     if (!this.isDead() && this.canDoSomething()) {
       // first advance towards nearest foe
       if (this.mp > 0) {
+        // eslint-disable-next-line prefer-const
         let { nearestFoe, pathToNearestFoe, distance } = this.findNearestFoe();
 
         if (nearestFoe) {
@@ -79,7 +80,9 @@ export class Npc extends Unit {
   }
 
   private findNearestFoe() {
-    let foes = this.isAlly ? this.battleScene.enemies : this.battleScene.allies;
+    const foes = this.isAlly
+      ? this.battleScene.enemies
+      : this.battleScene.allies;
 
     let nearestFoe: Unit = null;
     let distance = 9999;
@@ -122,7 +125,7 @@ export class Npc extends Unit {
       // else locate a possible target for this spell
     } else {
       let x: number, y: number;
-      let targetTile = this.locateTarget(spell);
+      const targetTile = this.locateTarget(spell);
       if (targetTile) {
         ({ x, y } = this.locateTarget(spell));
       }
@@ -146,7 +149,7 @@ export class Npc extends Unit {
     }
   }
 
-  private isUnitTargetableWithSpell(spell: Spell, targetUnit: any) {
+  private isUnitTargetableWithSpell(spell: Spell, targetUnit: Unit) {
     return this.battleScene.isTileAccessibleToSpell(
       this,
       spell,

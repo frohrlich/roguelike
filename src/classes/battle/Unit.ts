@@ -46,7 +46,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
   direction: string;
   isMoving: boolean;
   // chain of tweens containing the successive moving tweens in path from tile A to tile B
-  moveChain: any = {};
+  moveChain: Phaser.Types.Tweens.TweenChainBuilderConfig;
   frameNumber: number;
   isAlly: boolean;
   healthBar: Phaser.GameObjects.Graphics;
@@ -90,12 +90,14 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.isAlly = isAlly;
 
     // tween move chain setup
-    this.moveChain.targets = this;
-    this.moveChain.onStart = () => {
-      this.isMoving = true;
+    this.moveChain = {
+      targets: this,
+      onStart: () => {
+        this.isMoving = true;
+      },
+      onComplete: this.stopMovement,
+      tweens: [],
     };
-    this.moveChain.onComplete = this.stopMovement;
-    this.moveChain.tweens = [];
 
     this.addHoverEvents();
 
@@ -221,6 +223,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
 
   private move(targetIndX: number, targetIndY: number, direction: string) {
     this.moveChain.tweens.push({
+      targets: this,
       x: this.tilePosToPixelsX(targetIndX),
       y: this.tilePosToPixelsY(targetIndY),
       ease: "Linear",
@@ -410,10 +413,10 @@ export class Unit extends Phaser.GameObjects.Sprite {
     this.battleScene.removeFromObstacleLayer(this.indX, this.indY);
     if (isAlignedX) {
       let deltaX = value * isForward;
-      let direction = Math.sign(deltaX);
+      const direction = Math.sign(deltaX);
       // stop when there is an obstacle or edge of map
       for (let i = 0; Math.abs(i) < Math.abs(deltaX); i += direction) {
-        let nextTileX = this.indX + i + direction;
+        const nextTileX = this.indX + i + direction;
         if (
           !this.battleScene.backgroundLayer.getTileAt(nextTileX, this.indY) ||
           !this.battleScene.isWalkable(nextTileX, this.indY) ||
@@ -449,10 +452,10 @@ export class Unit extends Phaser.GameObjects.Sprite {
       }
     } else {
       let deltaY = value * isForward;
-      let direction = Math.sign(deltaY);
+      const direction = Math.sign(deltaY);
       // stop when there is an obstacle or edge of map
       for (let i = 0; Math.abs(i) < Math.abs(deltaY); i += direction) {
-        let nextTileY = this.indY + i + direction;
+        const nextTileY = this.indY + i + direction;
         if (
           !this.battleScene.backgroundLayer.getTileAt(this.indX, nextTileY) ||
           !this.battleScene.isWalkable(this.indX, nextTileY) ||
@@ -649,8 +652,8 @@ export class Unit extends Phaser.GameObjects.Sprite {
       default:
         break;
     }
-    let isOnTop = this.indY < 2;
-    let malus = this.scene.add
+    const isOnTop = this.indY < 2;
+    const malus = this.scene.add
       .bitmapText(
         this.x - 2,
         isOnTop ? this.y + 20 : this.y - this.displayHeight + 5,
@@ -834,7 +837,7 @@ export class Unit extends Phaser.GameObjects.Sprite {
       : this.y - this.displayHeight - this.healthBarOverUnitOffset;
   }
 
-  addSpells(...spells: Spell[]) {
+  addSpells(spells: Spell[]) {
     const copySpells = [];
     // each unit must have its own copy of each spell to manage cooldowns separately
     spells.forEach((spell) => {

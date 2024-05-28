@@ -6,6 +6,10 @@ import { CharacterCard } from "../classes/cards/CharacterCard";
 import { BonusCard } from "../classes/cards/BonusCard";
 import { MapService } from "../services/MapService";
 
+interface ChooseCardSceneData {
+  isStarting: boolean;
+}
+
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;
 
@@ -25,7 +29,7 @@ export class ChooseCardScene extends Phaser.Scene {
     });
   }
 
-  create(data: any) {
+  create(data: ChooseCardSceneData) {
     this.cards = [];
     this.remainingBonusCards = { ...DeckService.bonusCardsData };
     this.remainingCharacterCards = { ...UnitService.remainingUnits };

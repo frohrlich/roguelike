@@ -1,4 +1,4 @@
-import { TilePosition } from './findPath';
+import { TilePosition } from "./findPath";
 
 interface QueueElement {
   element: TilePosition;
@@ -13,7 +13,7 @@ export class PriorityQueue {
   }
 
   enqueue(element: TilePosition, priority: number) {
-    let queueElement: QueueElement = { element, priority };
+    const queueElement: QueueElement = { element, priority };
     let added = false;
     for (let i = 0; i < this.items.length; i++) {
       if (queueElement.priority < this.items[i].priority) {

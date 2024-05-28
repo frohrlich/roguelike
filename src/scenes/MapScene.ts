@@ -135,13 +135,13 @@ export class MapScene extends Phaser.Scene {
 
   drawDottedLine() {
     const posY = this.game.scale.height / 2.2;
-    let graphics = this.add.graphics();
+    const graphics = this.add.graphics();
     graphics.lineStyle(4, 0x666666, 1);
     graphics.beginPath();
-    let dash_length = 15;
-    let gap_length = 15;
+    const dash_length = 15;
+    const gap_length = 15;
     let x = this.game.scale.width / 6;
-    let y = posY;
+    const y = posY;
     graphics.moveTo(x, y);
     while (x < this.game.scale.width) {
       x += dash_length;

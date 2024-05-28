@@ -1,5 +1,9 @@
 import Phaser from "phaser";
 
+interface EndSceneData {
+  isWin: boolean;
+}
+
 export class EndScene extends Phaser.Scene {
   constructor() {
     super({
@@ -7,7 +11,7 @@ export class EndScene extends Phaser.Scene {
     });
   }
 
-  create(data: any): void {
+  create(data: EndSceneData): void {
     this.createBackground(data.isWin);
     this.createText(data.isWin);
     this.createPlayAgainButton();
@@ -50,10 +54,10 @@ export class EndScene extends Phaser.Scene {
   }
 
   private createText(isWin: boolean) {
-    let text = isWin ? "Congratulations, you win !" : "Game over...";
-    let gameWidth = this.game.config.width as number;
-    let gameHeight = this.game.config.height as number;
-    let myText = this.add.bitmapText(
+    const text = isWin ? "Congratulations, you win !" : "Game over...";
+    const gameWidth = this.game.config.width as number;
+    const gameHeight = this.game.config.height as number;
+    const myText = this.add.bitmapText(
       gameWidth / 2,
       gameHeight / 2,
       "dogicapixel",

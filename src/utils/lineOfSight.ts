@@ -39,7 +39,7 @@ const isVisible = (
       return false;
     }
     if (x0 == x1 && y0 == y1) return true;
-    let e2 = 2 * error;
+    const e2 = 2 * error;
     if (e2 >= dy) {
       if (x0 == x1) break;
       error = error + dy;
