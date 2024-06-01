@@ -1,6 +1,9 @@
 {
   "name": "roguelike",
   "version": "0.0.1",
+  "engines": {
+    "node": "20.10"
+  },
   "description": "A roguelike tactical RPG with cards made with Phaser 3",
   "main": "index.js",
   "scripts": {
