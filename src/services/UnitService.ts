@@ -43,7 +43,7 @@ export class UnitService {
       isPlayable: true,
     },
     Ghost: {
-      HP: 150,
+      HP: 200,
       MP: 6,
       AP: 6,
       spells: "Biting",
@@ -61,7 +61,7 @@ export class UnitService {
       description: "Just some pig.",
     },
     Wasp: {
-      HP: 100,
+      HP: 130,
       MP: 8,
       AP: 6,
       spells: "Wasp sting",
