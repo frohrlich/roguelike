@@ -6,7 +6,6 @@
   },
   "description": "A roguelike tactical RPG with cards made with Phaser 3",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "build": "webpack --mode=production",
     "start": "node server.js",

@@ -1,5 +1,6 @@
-import path from "path";
-import express from "express";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require("path");
+const express = require("express");
 
 const app = express();
 const HTML_FILE = path.join(__dirname, "public/index.html");

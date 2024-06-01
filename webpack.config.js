@@ -1,5 +1,6 @@
-import path from "path";
-import HtmlWebpackPlugin from "html-webpack-plugin";
+/* eslint-disable @typescript-eslint/no-var-requires */
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   entry: "./src/app.ts",
