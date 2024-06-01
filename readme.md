@@ -1,5 +1,7 @@
 A roguelike tactical RPG with cards made with Phaser 3.
 
+A demo is available on : https://aqueous-lake-67098-ced6104448ac.herokuapp.com/
+
 To compile and start the project, just run :
 
 ```
