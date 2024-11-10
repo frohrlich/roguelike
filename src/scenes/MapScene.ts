@@ -18,6 +18,10 @@ export class MapScene extends Phaser.Scene {
     });
   }
 
+  preload() {
+    this.loadBackgroundImage(`${MapService.getCurrentZoneName()}_background`);
+  }
+
   create() {
     if (MapService.position === 0) {
       this.locationNames = [];
@@ -165,5 +169,9 @@ export class MapScene extends Phaser.Scene {
         fontSize
       )
       .setOrigin(0.5, 1);
+  }
+
+  private loadBackgroundImage(key: string) {
+    this.load.image(key, `public/assets/images/backgrounds/${key}.png`);
   }
 }

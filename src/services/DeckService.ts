@@ -1,8 +1,11 @@
-export interface BonusData {
-  type: string;
+export interface BonusData extends CardData {
   name: string;
-  description: string;
   onCardDescription: string;
+}
+
+export interface CardData {
+  type: string;
+  description: string;
 }
 
 export class DeckService {
@@ -51,22 +54,3 @@ export class DeckService {
     this.cards.push(cardName);
   }
 }
-
-/*
-export class Deck {
-  cards: string[] = []
-  addCard (cardName: string) { ... }
-}
-
-export default DeckService {
-  decks: { [key: number]: Deck } = {}
-
-  createDeck (entityId: number) {
-    this.decks[entityId] = new Deck
-  }
-
-  getDeck (entityId: number) {
-    return this.decks[entityId]
-  }
-}
-*/

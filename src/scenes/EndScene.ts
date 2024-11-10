@@ -11,6 +11,11 @@ export class EndScene extends Phaser.Scene {
     });
   }
 
+  preload() {
+    this.loadBackgroundImage("win_image");
+    this.loadBackgroundImage("gameover_image");
+  }
+
   create(data: EndSceneData): void {
     this.createBackground(data.isWin);
     this.createText(data.isWin);
@@ -70,5 +75,9 @@ export class EndScene extends Phaser.Scene {
   private createBackground(isWin: boolean) {
     const imageKey = isWin ? "win_image" : "gameover_image";
     this.add.image(0, 0, imageKey).setOrigin(0, 0).setTint(0x555555);
+  }
+
+  private loadBackgroundImage(key: string) {
+    this.load.image(key, `public/assets/images/backgrounds/${key}.png`);
   }
 }

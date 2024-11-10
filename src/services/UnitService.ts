@@ -1,11 +1,11 @@
-export interface UnitData {
+import { CardData } from "./DeckService";
+
+export interface UnitData extends CardData {
   HP: number;
   MP: number;
   AP: number;
   spells: string;
   frame: number;
-  type: string;
-  description: string;
   isPlayable?: boolean;
 }
 

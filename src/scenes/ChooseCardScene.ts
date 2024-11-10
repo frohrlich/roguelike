@@ -12,6 +12,7 @@ interface ChooseCardSceneData {
 
 export class ChooseCardScene extends Phaser.Scene {
   cardMargin = 20;
+  cardCount = 3; // number of cards to choose from
 
   currentCardChoice: string;
   isStarting: boolean;
@@ -20,8 +21,9 @@ export class ChooseCardScene extends Phaser.Scene {
   chooseButton: Phaser.GameObjects.Rectangle;
   description: Phaser.GameObjects.BitmapText;
   unselectCardOverlay: Phaser.GameObjects.Rectangle;
-  remainingBonusCards: { [key: string]: BonusData };
-  remainingCharacterCards: { [key: string]: UnitData };
+  cardsToSelectFrom: { [key: string]: any };
+  selectedCardTypes: string[];
+  isCharacterCards: boolean;
 
   constructor() {
     super({
@@ -29,10 +31,38 @@ export class ChooseCardScene extends Phaser.Scene {
     });
   }
 
+  preload(): void {
+    this.selectCards();
+  }
+
+  private selectCards() {
+    this.selectedCardTypes = [];
+    if (MapService.position === 0) {
+      // at each zone beginning, choose a new character card
+      this.isCharacterCards = true;
+      this.cardsToSelectFrom = { ...UnitService.remainingUnits };
+    } else {
+      // else choose a bonus card
+      this.isCharacterCards = false;
+      this.cardsToSelectFrom = { ...DeckService.bonusCardsData };
+    }
+
+    for (let i = 0; i < this.cardCount; i++) {
+      this.selectCard();
+    }
+  }
+
+  selectCard() {
+    const cardTypes = Object.keys(this.cardsToSelectFrom);
+    const randIndex = Phaser.Math.RND.between(0, cardTypes.length - 1);
+    const cardType = cardTypes[randIndex];
+    this.selectedCardTypes.push(cardType);
+    delete this.cardsToSelectFrom[cardType];
+    this.loadCardIllustration(cardType);
+  }
+
   create(data: ChooseCardSceneData) {
     this.cards = [];
-    this.remainingBonusCards = { ...DeckService.bonusCardsData };
-    this.remainingCharacterCards = { ...UnitService.remainingUnits };
     this.unselectCardOverlay = null;
     this.isStarting = data.isStarting;
     this.addBackground();
@@ -232,59 +262,39 @@ export class ChooseCardScene extends Phaser.Scene {
   }
 
   private addCards() {
-    let card1: Card, card2: Card, card3: Card;
+    for (let position = 0; position < this.cardCount; position++) {
+      this.addCard(position);
+    }
+  }
 
-    // at each zone beginning, choose a new character
-    if (MapService.position === 0) {
-      card1 = this.addRandomCharacterCard();
-      card2 = this.addRandomCharacterCard();
-      card3 = this.addRandomCharacterCard();
-      // else choose a bonus card
+  private addCard(position: number) {
+    let card: Card;
+    if (this.isCharacterCards) {
+      card = new CharacterCard(
+        this,
+        0,
+        this.game.scale.height / 2,
+        true,
+        UnitService.remainingUnits[this.selectedCardTypes[position]]
+      );
     } else {
-      card1 = this.addRandomBonusCard();
-      card2 = this.addRandomBonusCard();
-      card3 = this.addRandomBonusCard();
+      card = new BonusCard(
+        this,
+        0,
+        this.game.scale.height / 2,
+        true,
+        DeckService.bonusCardsData[this.selectedCardTypes[position]]
+      );
     }
 
-    card1.setDepth(4).setX(card1.displayWidth / 2 + this.cardMargin);
-    card2.setDepth(3).setX(card1.displayWidth * 1.5 + this.cardMargin * 2);
-    card3.setDepth(2).setX(card1.displayWidth * 2.5 + this.cardMargin * 3);
+    card
+      .setDepth(4 - position)
+      .setX(
+        card.displayWidth * (position + 0.5) + this.cardMargin * (1 + position)
+      );
 
-    this.cards.push(card1, card2, card3);
-    this.add.existing(card1);
-    this.add.existing(card2);
-    this.add.existing(card3);
-  }
-
-  private addRandomCharacterCard() {
-    const characterTypes = Object.keys(this.remainingCharacterCards);
-    const randIndex = Phaser.Math.RND.between(0, characterTypes.length - 1);
-    const characterType = characterTypes[randIndex];
-
-    const card = new CharacterCard(
-      this,
-      0,
-      this.game.scale.height / 2,
-      true,
-      this.remainingCharacterCards[characterType]
-    );
-    delete this.remainingCharacterCards[characterType];
-    return card;
-  }
-
-  private addRandomBonusCard() {
-    const bonusCardsTypes = Object.keys(this.remainingBonusCards);
-    const randIndex = Phaser.Math.RND.between(0, bonusCardsTypes.length - 1);
-    const bonusCardType = bonusCardsTypes[randIndex];
-    const card = new BonusCard(
-      this,
-      0,
-      this.game.scale.height / 2,
-      true,
-      this.remainingBonusCards[bonusCardType]
-    );
-    delete this.remainingBonusCards[bonusCardType];
-    return card;
+    this.cards.push(card);
+    this.add.existing(card);
   }
 
   addDeckButton() {
@@ -336,6 +346,13 @@ export class ChooseCardScene extends Phaser.Scene {
       .setDepth(3)
       .setOrigin(0.5, 0.5);
   }
+
+  private loadCardIllustration(key: string) {
+    this.load.image(
+      key + "Illus",
+      `public/assets/images/cards/${lowercaseFirstLetter(key)}.png`
+    );
+  }
 }
 
 const arrayWithoutElementAtIndex = (cards: Card[], index: number) => {
@@ -343,3 +360,7 @@ const arrayWithoutElementAtIndex = (cards: Card[], index: number) => {
     return index !== arrIndex;
   });
 };
+
+function lowercaseFirstLetter(val: string) {
+  return String(val).charAt(0).toLowerCase() + String(val).slice(1);
+}

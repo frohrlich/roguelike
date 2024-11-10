@@ -55,6 +55,8 @@ export class BattleScene extends Phaser.Scene {
   allyStarterTiles: Phaser.Tilemaps.Tile[];
   enemyStarterTiles: Phaser.Tilemaps.Tile[];
   isInPreparationPhase: boolean;
+  battleMapName: string;
+  tilesetName: string;
 
   // bonuses from cards
   rangeBonus = 0;
@@ -76,6 +78,10 @@ export class BattleScene extends Phaser.Scene {
     for (let i = 1; i <= this.mapsCount; i++) {
       this.mapNumbers.push(i);
     }
+  }
+
+  preload() {
+    this.loadBattleMap();
   }
 
   create(data: BattleSceneData): void {
@@ -437,32 +443,39 @@ export class BattleScene extends Phaser.Scene {
     this.enemies = [];
   }
 
-  private createTilemap() {
+  private loadBattleMap() {
     const mapName = MapService.getCurrentZoneName();
     // choose map randomly among a set
     const randomMapIndex = Phaser.Math.RND.between(
       0,
       BattleScene.mapNumbers.length - 1
     );
+    this.battleMapName = `${mapName}_battlemap${BattleScene.mapNumbers[randomMapIndex]}`;
 
-    this.map = this.make.tilemap({
-      key: `${mapName}_battlemap${BattleScene.mapNumbers[randomMapIndex]}`,
-    });
+    this.tilesetName = mapName;
+    // the forest tileset is common to forest and corrupt_forest zones
+    if (this.tilesetName.includes("forest")) {
+      this.tilesetName = "forest";
+    }
+
+    this.loadSpriteSheet(this.tilesetName);
+    this.loadJsonMap(this.battleMapName);
+
     // then remove map from current battle maps so we don't get the same one twice
     BattleScene.mapNumbers.splice(randomMapIndex, 1);
+  }
+
+  private createTilemap() {
+    this.map = this.make.tilemap({
+      key: this.battleMapName,
+    });
 
     this.tileWidth = this.map.tileWidth;
     this.tileHeight = this.map.tileHeight;
 
-    // get the tileset
-    let tilesetName = MapService.getCurrentZoneName();
-    // the forest tileset is common to forest and corrupt_forest zones
-    if (tilesetName.includes("forest")) {
-      tilesetName = "forest";
-    }
     this.tileset = this.map.addTilesetImage(
-      `${tilesetName}_tilemap`,
-      `${tilesetName}_tiles`
+      `${this.tilesetName}_tilemap`,
+      `${this.tilesetName}_tiles`
     );
 
     // create layers
@@ -1249,8 +1262,8 @@ export class BattleScene extends Phaser.Scene {
       callback: () => {
         this.resetScene();
         MapService.incrementPosition();
-        // if you reached the end of the last zone, you win !
         if (MapService.zone >= MapService.zoneCount) {
+          // if you reached the end of the last zone, you win !
           this.resetGameState();
           this.scene.start("EndScene", { isWin: true });
         } else {
@@ -1320,5 +1333,13 @@ export class BattleScene extends Phaser.Scene {
       }
     }
     this.timeline = timeline;
+  }
+
+  private loadJsonMap(key: string) {
+    this.load.tilemapTiledJSON(key, `public/assets/map/${key}.json`);
+  }
+
+  private loadSpriteSheet(key: string) {
+    this.load.image(`${key}_tiles`, `public/assets/map/${key}_spritesheet.png`);
   }
 }
