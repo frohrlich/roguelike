@@ -2,6 +2,9 @@
 const path = require("path");
 const express = require("express");
 
+require('dotenv').config();
+
+
 const app = express();
 const HTML_FILE = path.join(__dirname, "public/index.html");
 

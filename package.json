@@ -28,6 +28,7 @@
     "webpack-dev-server": "^5.0.4"
   },
   "dependencies": {
+    "dotenv": "^17.2.1",
     "express": "^4.19.2",
     "screenfull": "^6.0.2",
     "ua-parser-js": "^1.0.37"
